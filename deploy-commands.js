@@ -11,7 +11,10 @@ for (const folder of folders) {
 
   for (const file of files) {
     const command = require(`./commands/${folder}/${file}`);
-    commands.push(command.data.toJSON());
+    
+    if (command.data && command.data.toJSON) {
+      commands.push(command.data.toJSON());
+    }
   }
 }
 
