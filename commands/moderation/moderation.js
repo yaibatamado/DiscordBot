@@ -68,6 +68,18 @@ module.exports = {
     const sub = interaction.options.getSubcommand();
     const member = interaction.member;
 
+    const fetchTarget = async (user) => {
+      try {
+        return await interaction.guild.members.fetch(user.id);
+      } catch (err) {
+        await interaction.reply({
+          content: '❌ Không tìm thấy thành viên',
+          ephemeral: true
+        });
+        return null;
+      }
+    };
+
     // 🔒 check quyền
     if (!member.permissions.has(PermissionFlagsBits.ModerateMembers)) {
       return interaction.reply({ content: '❌ Không có quyền', ephemeral: true });
@@ -76,7 +88,8 @@ module.exports = {
     // ===== KICK =====
     if (sub === 'kick') {
       const user = interaction.options.getUser('user');
-      const target = interaction.guild.members.cache.get(user.id);
+      const target = await fetchTarget(user);
+      if (!target) return;
 
       await target.kick();
       return interaction.reply(`👢 Đã kick ${user.tag}`);
@@ -102,7 +115,8 @@ module.exports = {
     if (sub === 'timeout') {
       const user = interaction.options.getUser('user');
       const time = interaction.options.getInteger('time');
-      const target = interaction.guild.members.cache.get(user.id);
+      const target = await fetchTarget(user);
+      if (!target) return;
 
       await target.timeout(time * 60 * 1000);
       return interaction.reply(`⏳ Timeout ${user.tag} ${time} phút`);
@@ -111,7 +125,8 @@ module.exports = {
     // ===== UNTIMEOUT =====
     if (sub === 'untimeout') {
       const user = interaction.options.getUser('user');
-      const target = interaction.guild.members.cache.get(user.id);
+      const target = await fetchTarget(user);
+      if (!target) return;
 
       await target.timeout(null);
       return interaction.reply(`✅ Gỡ timeout ${user.tag}`);
@@ -120,7 +135,8 @@ module.exports = {
     // ===== MUTE =====
     if (sub === 'mute') {
       const user = interaction.options.getUser('user');
-      const target = interaction.guild.members.cache.get(user.id);
+      const target = await fetchTarget(user);
+      if (!target) return;
 
       await target.timeout(10 * 60 * 1000); // giả mute = timeout
       return interaction.reply(`🔇 Mute ${user.tag}`);
@@ -129,7 +145,8 @@ module.exports = {
     // ===== UNMUTE =====
     if (sub === 'unmute') {
       const user = interaction.options.getUser('user');
-      const target = interaction.guild.members.cache.get(user.id);
+      const target = await fetchTarget(user);
+      if (!target) return;
 
       await target.timeout(null);
       return interaction.reply(`🔊 Unmute ${user.tag}`);

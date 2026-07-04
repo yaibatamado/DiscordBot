@@ -2,7 +2,7 @@ const embed = require('../../utils/embed');
 
 module.exports = {
   name: 'nhac',
-  aliases: ['nt'],
+  aliases: ['nh'],
   cooldown: 5,
   permission: 'everyone',
 

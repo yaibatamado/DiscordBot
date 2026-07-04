@@ -1,7 +1,8 @@
 {
   "scripts": {
     "start": "node index.js",
-    "deploy": "node deploy-commands.js"
+    "deploy": "node deploy-commands.js",
+    "test": "node --test"
   },
   "dependencies": {
     "discord.js": "^14.25.1",

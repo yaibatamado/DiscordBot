@@ -12,7 +12,7 @@ module.exports = (client) => {
     for (const file of files) {
       const command = require(`../commands/${folder}/${file}`);
 
-      if (command.data && command.execute) {
+      if (command.data && command.data.toJSON && command.execute) {
         client.slashCommands.set(command.data.name, command);
         console.log(`✅ Loaded slash: ${command.data.name}`);
       }
