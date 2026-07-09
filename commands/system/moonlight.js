@@ -49,7 +49,6 @@ const buildMoonlightEmbed = (client) => createEmbed({
     { name: 'Uptime', value: formatUptime(client.uptime), inline: true },
     { name: 'Servers', value: String(client.guilds?.cache?.size ?? 0), inline: true },
     { name: 'Main Commands', value: '`/help` `/pet` `/setup` `/mod` `/server`', inline: false },
-    { name: 'Invite', value: `[Invite Moonlight](${buildInviteUrl()})\nPermission: **Administrator**`, inline: false },
   ],
   footer: 'Moonlight System',
 });
