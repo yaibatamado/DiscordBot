@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-const { Client, GatewayIntentBits } = require('discord.js');
+const { ActivityType, Client, GatewayIntentBits } = require('discord.js');
 const fs = require('fs');
 
 const { loadCommands } = require('./handlers/commandHandler');
@@ -31,6 +31,11 @@ for (const file of eventFiles) {
 }
 
 client.on('clientReady', () => {
+  client.user.setPresence({
+    activities: [{ name: '/help', type: ActivityType.Playing }],
+    status: 'online',
+  });
+
   console.log(`📡 BOT ONLINE: ${client.user.tag}`);
 });
 
