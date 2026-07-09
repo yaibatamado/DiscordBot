@@ -73,10 +73,9 @@ test('moderation clear deletes messages from a selected user in the selected tim
 
   await moderation.execute(interaction);
 
-  assert.deepEqual(deleted, [
-    '1',
-    '✅ Đã xóa 1 tin nhắn',
-  ]);
+  assert.equal(deleted[0], '1');
+  assert.match(deleted[1].embeds[0].data.title, /Messages Cleared/);
+  assert.match(deleted[1].embeds[0].data.description, /1/);
 });
 
 test('moderation clear without amount scans pages until all deletable messages are removed', async () => {
@@ -127,10 +126,8 @@ test('moderation clear without amount scans pages until all deletable messages a
 
   await moderation.execute(interaction);
 
-  assert.deepEqual(deleted, [
-    'defer',
-    '3',
-    '1',
-    '✅ Đã xóa 2 tin nhắn',
-  ]);
+  assert.deepEqual(deleted.slice(0, 3), ['defer', '3', '1']);
+  assert.match(deleted[3].embeds[0].data.title, /Messages Cleared/);
+  assert.match(deleted[3].embeds[0].data.description, /2/);
 });
+

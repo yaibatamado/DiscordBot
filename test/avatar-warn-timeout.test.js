@@ -88,8 +88,9 @@ test('mod timeout exposes optional reason and includes it in the response', asyn
     reply: async (message) => calls.push(message),
   });
 
-  assert.deepEqual(calls, [
-    'timeout:600000:spam',
-    '⏳ Timeout Target#0001 10 phút\nLý do: spam',
-  ]);
+  assert.equal(calls[0], 'timeout:600000:spam');
+  assert.match(calls[1].embeds[0].data.title, /Member Timed Out/);
+  assert.match(calls[1].embeds[0].data.description, /Target#0001/);
+  assert.match(calls[1].embeds[0].data.fields.find((field) => field.name === 'Reason').value, /spam/);
 });
+

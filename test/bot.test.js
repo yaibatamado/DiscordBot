@@ -47,6 +47,7 @@ test('slash loader only registers slash commands with slash metadata', () => {
     'leave',
     'mod',
     'pet',
+    'server',
     'setup',
     'warn',
   ]);
@@ -130,9 +131,9 @@ test('moderation kick fetches the target member before acting', async () => {
 
   await moderation.execute(interaction);
 
-  assert.deepEqual(calls, [
-    'fetch:123',
-    'kick',
-    '👢 Đã kick TestUser#0001',
-  ]);
+  assert.equal(calls[0], 'fetch:123');
+  assert.equal(calls[1], 'kick');
+  assert.match(calls[2].embeds[0].data.title, /Member Kicked/);
+  assert.match(calls[2].embeds[0].data.description, /TestUser#0001/);
 });
+
