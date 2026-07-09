@@ -47,6 +47,7 @@ test('slash loader only registers slash commands with slash metadata', () => {
     'leave',
     'mod',
     'pet',
+    'setup',
     'warn',
   ]);
 });

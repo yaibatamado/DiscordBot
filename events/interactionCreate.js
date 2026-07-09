@@ -197,6 +197,14 @@ module.exports = (client) => {
         }
       }
 
+      if (interaction.customId.startsWith('setup:')) {
+        const setupCommand = client.slashCommands.get('setup');
+        if (setupCommand?.handleComponent) {
+          await setupCommand.handleComponent(interaction);
+          return;
+        }
+      }
+
       if (interaction.customId === 'back') {
 
         const msgId = interaction.message.id;
