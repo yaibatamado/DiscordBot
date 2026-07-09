@@ -86,6 +86,26 @@ const findUserRoom = (guild, mode, userId) => (
   guild.channels.cache.find((channel) => isUserRoom(channel, mode, userId))
 );
 
+const getRoomOwnerId = (channel, guild) => {
+  const ignoredIds = new Set([
+    guild.roles.everyone.id,
+    guild.members.me.id,
+  ]);
+
+  for (const [id, overwrite] of channel.permissionOverwrites?.cache || []) {
+    if (!ignoredIds.has(id) && includesPermission(overwrite.allow, PermissionFlagsBits.ManageChannels)) {
+      return id;
+    }
+  }
+
+  return null;
+};
+
+const isPrivateVoiceRoom = (channel, guild) => (
+  channel?.type === ChannelType.GuildVoice
+  && Boolean(getRoomOwnerId(channel, guild))
+);
+
 const buildPanelEmbed = (mode) => {
   const isVoice = mode === 'voice';
 
@@ -123,7 +143,7 @@ const buttonId = (mode, action) => `${SETUP_PREFIX}:${mode}:${action}`;
 const modalId = (mode, userId, action) => `${SETUP_PREFIX}:${mode}:${userId}:${action}Modal`;
 const selectId = (mode, userId, action) => `${SETUP_PREFIX}:${mode}:${userId}:${action}Select`;
 
-const buildPanelComponents = (mode) => {
+const buildPanelComponentsLegacy = (mode) => {
   const firstRowButtons = [
     new ButtonBuilder()
       .setCustomId(buttonId(mode, 'create'))
@@ -192,6 +212,111 @@ const buildPanelComponents = (mode) => {
         .setStyle(ButtonStyle.Secondary)
     ),
   ];
+};
+
+const buildPanelComponents = (mode) => {
+  const firstRowButtons = [
+    new ButtonBuilder()
+      .setCustomId(buttonId(mode, 'create'))
+      .setLabel(mode === 'voice' ? 'Tao Voice' : 'Tao Channel')
+      .setEmoji(mode === 'voice' ? '🎙️' : '#️⃣')
+      .setStyle(ButtonStyle.Success),
+    new ButtonBuilder()
+      .setCustomId(buttonId(mode, 'rename'))
+      .setLabel('Doi Ten')
+      .setEmoji('🏷️')
+      .setStyle(ButtonStyle.Secondary),
+  ];
+
+  if (mode === 'voice') {
+    firstRowButtons.push(
+      new ButtonBuilder()
+        .setCustomId(buttonId(mode, 'limit'))
+        .setLabel('Gioi Han')
+        .setEmoji('👥')
+        .setStyle(ButtonStyle.Secondary)
+    );
+  }
+
+  firstRowButtons.push(
+    new ButtonBuilder()
+      .setCustomId(buttonId(mode, 'delete'))
+      .setLabel('Xoa')
+      .setEmoji('🗑️')
+      .setStyle(ButtonStyle.Danger)
+  );
+
+  const rows = [
+    new ActionRowBuilder().addComponents(...firstRowButtons),
+    new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId(buttonId(mode, 'lock'))
+        .setLabel('Lock')
+        .setEmoji('🔒')
+        .setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder()
+        .setCustomId(buttonId(mode, 'unlock'))
+        .setLabel('Unlock')
+        .setEmoji('🔓')
+        .setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder()
+        .setCustomId(buttonId(mode, 'invite'))
+        .setLabel('Moi')
+        .setEmoji('📨')
+        .setStyle(ButtonStyle.Primary),
+      new ButtonBuilder()
+        .setCustomId(buttonId(mode, 'trust'))
+        .setLabel('Trust')
+        .setEmoji('✅')
+        .setStyle(ButtonStyle.Success),
+      new ButtonBuilder()
+        .setCustomId(buttonId(mode, 'untrust'))
+        .setLabel('Untrust')
+        .setEmoji('❌')
+        .setStyle(ButtonStyle.Secondary)
+    ),
+    new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId(buttonId(mode, 'kick'))
+        .setLabel(mode === 'voice' ? 'Kick' : 'Go Quyen')
+        .setEmoji('👢')
+        .setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder()
+        .setCustomId(buttonId(mode, 'block'))
+        .setLabel('Chan')
+        .setEmoji('⛔')
+        .setStyle(ButtonStyle.Danger),
+      new ButtonBuilder()
+        .setCustomId(buttonId(mode, 'hide'))
+        .setLabel('An')
+        .setEmoji('🙈')
+        .setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder()
+        .setCustomId(buttonId(mode, 'show'))
+        .setLabel('Hien')
+        .setEmoji('👁️')
+        .setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder()
+        .setCustomId(buttonId(mode, 'transfer'))
+        .setLabel('Chuyen Chu')
+        .setEmoji('👑')
+        .setStyle(ButtonStyle.Secondary)
+    ),
+  ];
+
+  if (mode === 'voice') {
+    rows.push(
+      new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId(buttonId(mode, 'claim'))
+          .setLabel('Claim')
+          .setEmoji('🙋')
+          .setStyle(ButtonStyle.Primary)
+      )
+    );
+  }
+
+  return rows;
 };
 
 const buildLimitModal = (userId) => (
@@ -352,25 +477,37 @@ const setRoomPrivacy = async (interaction, mode, locked) => {
   const everyoneId = interaction.guild.roles.everyone.id;
   const lockedOptions = mode === 'voice'
     ? {
-      ViewChannel: false,
       Connect: false,
     }
     : {
-      ViewChannel: false,
+      SendMessages: false,
     };
   const unlockedOptions = mode === 'voice'
     ? {
-      ViewChannel: true,
       Connect: true,
     }
     : {
-      ViewChannel: true,
+      SendMessages: true,
     };
 
   await editOverwrite(channel, everyoneId, locked ? lockedOptions : unlockedOptions);
 
   await interaction.reply({
     content: locked ? 'Đã khóa phòng riêng của bạn.' : 'Đã mở phòng riêng của bạn.',
+    flags: MessageFlags.Ephemeral,
+  });
+};
+
+const setRoomVisibility = async (interaction, mode, hidden) => {
+  const channel = await requireOwnedRoom(interaction, mode, hidden ? 'hide' : 'show');
+  if (!channel) return;
+
+  await editOverwrite(channel, interaction.guild.roles.everyone.id, {
+    ViewChannel: !hidden,
+  });
+
+  await interaction.reply({
+    content: hidden ? 'Da an phong rieng cua ban.' : 'Da hien phong rieng cua ban.',
     flags: MessageFlags.Ephemeral,
   });
 };
@@ -417,6 +554,48 @@ const inviteUser = async (interaction, mode, targetId) => {
 
   await interaction.reply({
     content: `Đã mời <@${targetId}> vào phòng <#${channel.id}>.`,
+    flags: MessageFlags.Ephemeral,
+  });
+};
+
+const trustUser = async (interaction, mode, targetId) => {
+  const channel = await requireOwnedRoom(interaction, mode, 'trust');
+  if (!channel) return;
+
+  if (targetId === interaction.user.id) {
+    await interaction.reply({
+      content: 'Ban da la chu phong roi.',
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+
+  await editOverwrite(channel, targetId, {
+    allow: guestPermissions(mode),
+    deny: [],
+  });
+
+  await interaction.reply({
+    content: `Da trust <@${targetId}> trong phong <#${channel.id}>.`,
+    flags: MessageFlags.Ephemeral,
+  });
+};
+
+const untrustUser = async (interaction, mode, targetId) => {
+  const channel = await requireOwnedRoom(interaction, mode, 'untrust');
+  if (!channel) return;
+
+  if (targetId === interaction.user.id) {
+    await interaction.reply({
+      content: 'Ban khong the untrust chinh minh khi dang la chu phong.',
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+
+  await deleteOverwrite(channel, targetId);
+  await interaction.reply({
+    content: `Da untrust <@${targetId}> khoi phong <#${channel.id}>.`,
     flags: MessageFlags.Ephemeral,
   });
 };
@@ -508,6 +687,52 @@ const transferRoom = async (interaction, mode, targetId) => {
   });
 };
 
+const claimVoiceRoom = async (interaction) => {
+  const channel = interaction.member?.voice?.channel;
+  if (!isPrivateVoiceRoom(channel, interaction.guild)) {
+    await interaction.reply({
+      content: 'Ban can o trong mot voice rieng de claim.',
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+
+  const ownerId = getRoomOwnerId(channel, interaction.guild);
+  if (ownerId === interaction.user.id) {
+    await interaction.reply({
+      content: 'Ban dang la chu phong nay roi.',
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+
+  const ownerStillInside = channel.members?.has?.(ownerId);
+  if (ownerStillInside) {
+    await interaction.reply({
+      content: 'Chu phong van con trong voice, chua the claim.',
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+
+  await editOverwrite(channel, interaction.user.id, {
+    allow: ownerPermissions('voice'),
+    deny: [],
+  });
+
+  if (ownerId) {
+    await editOverwrite(channel, ownerId, {
+      allow: guestPermissions('voice'),
+      deny: [],
+    });
+  }
+
+  await interaction.reply({
+    content: `Da claim voice rieng <#${channel.id}>.`,
+    flags: MessageFlags.Ephemeral,
+  });
+};
+
 const parseSetupButton = (customId) => {
   const parts = customId.split(':');
   const [prefix, mode] = parts;
@@ -545,7 +770,7 @@ const parseSetupSelect = (customId) => {
     prefix !== SETUP_PREFIX
     || !['voice', 'channel'].includes(mode)
     || !userId
-    || !['invite', 'kick', 'block', 'transfer'].includes(action)
+    || !['invite', 'trust', 'untrust', 'kick', 'block', 'transfer'].includes(action)
   ) {
     return null;
   }
@@ -590,7 +815,17 @@ const handleComponent = async (interaction) => {
     return true;
   }
 
-  if (['invite', 'kick', 'block', 'transfer'].includes(parsed.action)) {
+  if (parsed.action === 'hide' || parsed.action === 'show') {
+    await setRoomVisibility(interaction, parsed.mode, parsed.action === 'hide');
+    return true;
+  }
+
+  if (parsed.action === 'claim' && parsed.mode === 'voice') {
+    await claimVoiceRoom(interaction);
+    return true;
+  }
+
+  if (['invite', 'trust', 'untrust', 'kick', 'block', 'transfer'].includes(parsed.action)) {
     await sendUserPicker(interaction, parsed.mode, parsed.action);
     return true;
   }
@@ -661,6 +896,16 @@ const handleUserSelect = async (interaction) => {
     return true;
   }
 
+  if (parsed.action === 'trust') {
+    await trustUser(interaction, parsed.mode, targetId);
+    return true;
+  }
+
+  if (parsed.action === 'untrust') {
+    await untrustUser(interaction, parsed.mode, targetId);
+    return true;
+  }
+
   if (parsed.action === 'kick') {
     await kickUser(interaction, parsed.mode, targetId);
     return true;
@@ -708,11 +953,14 @@ module.exports = {
     buildPanelComponents,
     buildRenameModal,
     buildUserSelect,
+    claimVoiceRoom,
     createRoom,
     deleteRoom,
     findUserRoom,
+    getRoomOwnerId,
     handleUserSelect,
     inviteUser,
+    isPrivateVoiceRoom,
     isUserRoom,
     kickUser,
     parseSetupButton,
@@ -721,7 +969,10 @@ module.exports = {
     renameRoom,
     roomName,
     setRoomPrivacy,
+    setRoomVisibility,
     setVoiceLimit,
+    trustUser,
     transferRoom,
+    untrustUser,
   },
 };

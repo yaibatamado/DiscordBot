@@ -112,7 +112,12 @@ test('setup voice sends an interface embed with public room controls', async () 
   assert.ok(ids.includes('setup:voice:rename'));
   assert.ok(ids.includes('setup:voice:limit'));
   assert.ok(ids.includes('setup:voice:invite'));
+  assert.ok(ids.includes('setup:voice:trust'));
+  assert.ok(ids.includes('setup:voice:untrust'));
+  assert.ok(ids.includes('setup:voice:hide'));
+  assert.ok(ids.includes('setup:voice:show'));
   assert.ok(ids.includes('setup:voice:transfer'));
+  assert.ok(ids.includes('setup:voice:claim'));
   assert.ok(ids.includes('setup:voice:delete'));
 });
 
@@ -249,4 +254,99 @@ test('setup transfer user select moves room ownership', async () => {
 
   assert.equal(setup._private.findUserRoom(guild, 'voice', 'user-1'), undefined);
   assert.equal(setup._private.findUserRoom(guild, 'voice', 'user-2'), guild._channels[0]);
+});
+
+test('setup trust and untrust update member room access', async () => {
+  const setup = require('../commands/system/setup');
+  const guild = createMockGuild();
+  const replies = [];
+
+  await setup.handleComponent({
+    customId: 'setup:channel:create',
+    user: { id: 'user-1', username: 'Yaiba' },
+    guild,
+    channel: { parentId: 'category-1' },
+    reply: async (payload) => replies.push(payload),
+  });
+
+  await setup.handleUserSelect({
+    customId: 'setup:channel:user-1:trustSelect',
+    user: { id: 'user-1', username: 'Yaiba' },
+    guild,
+    values: ['user-2'],
+    reply: async (payload) => replies.push(payload),
+  });
+
+  assert.ok(guild._channels[0].permissionOverwrites.cache.has('user-2'));
+
+  await setup.handleUserSelect({
+    customId: 'setup:channel:user-1:untrustSelect',
+    user: { id: 'user-1', username: 'Yaiba' },
+    guild,
+    values: ['user-2'],
+    reply: async (payload) => replies.push(payload),
+  });
+
+  assert.equal(guild._channels[0].permissionOverwrites.cache.has('user-2'), false);
+});
+
+test('setup hide and show update room visibility', async () => {
+  const setup = require('../commands/system/setup');
+  const guild = createMockGuild();
+  const replies = [];
+
+  await setup.handleComponent({
+    customId: 'setup:channel:create',
+    user: { id: 'user-1', username: 'Yaiba' },
+    guild,
+    channel: { parentId: 'category-1' },
+    reply: async (payload) => replies.push(payload),
+  });
+
+  await setup.handleComponent({
+    customId: 'setup:channel:hide',
+    user: { id: 'user-1', username: 'Yaiba' },
+    guild,
+    reply: async (payload) => replies.push(payload),
+  });
+
+  assert.equal(guild._channels[0].permissionOverwrites.cache.get('guild-1').ViewChannel, false);
+
+  await setup.handleComponent({
+    customId: 'setup:channel:show',
+    user: { id: 'user-1', username: 'Yaiba' },
+    guild,
+    reply: async (payload) => replies.push(payload),
+  });
+
+  assert.equal(guild._channels[0].permissionOverwrites.cache.get('guild-1').ViewChannel, true);
+});
+
+test('setup claim transfers an abandoned voice room to the claimant', async () => {
+  const setup = require('../commands/system/setup');
+  const guild = createMockGuild();
+  const replies = [];
+
+  await setup.handleComponent({
+    customId: 'setup:voice:create',
+    user: { id: 'user-1', username: 'Yaiba' },
+    guild,
+    channel: { parentId: 'category-1' },
+    member: { voice: { setChannel: async () => {} } },
+    reply: async (payload) => replies.push(payload),
+  });
+
+  const voiceRoom = guild._channels[0];
+  voiceRoom.members = new Map([['user-2', {}]]);
+
+  await setup.handleComponent({
+    customId: 'setup:voice:claim',
+    user: { id: 'user-2', username: 'Claimant' },
+    guild,
+    member: { voice: { channel: voiceRoom } },
+    reply: async (payload) => replies.push(payload),
+  });
+
+  assert.equal(setup._private.findUserRoom(guild, 'voice', 'user-1'), undefined);
+  assert.equal(setup._private.findUserRoom(guild, 'voice', 'user-2'), voiceRoom);
 });
