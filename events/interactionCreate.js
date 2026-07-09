@@ -183,6 +183,16 @@ module.exports = (client) => {
       }
     }
 
+    if (interaction.isUserSelectMenu?.()) {
+      if (interaction.customId.startsWith('setup:')) {
+        const setupCommand = client.slashCommands.get('setup');
+        if (setupCommand?.handleUserSelect) {
+          await setupCommand.handleUserSelect(interaction);
+          return;
+        }
+      }
+    }
+
     // ===== BACK =====
     if (interaction.isButton()) {
       if (

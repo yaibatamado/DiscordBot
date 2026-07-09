@@ -7,7 +7,10 @@ const createMockGuild = () => {
   const guild = {
     id: 'guild-1',
     roles: { everyone: { id: 'guild-1' } },
-    members: { me: { id: 'bot-1' } },
+    members: {
+      me: { id: 'bot-1' },
+      cache: new Map(),
+    },
     channels: {
       cache: {
         find: (predicate) => channels.find(predicate),
@@ -21,6 +24,10 @@ const createMockGuild = () => {
               overwrite.id,
               overwrite,
             ])),
+            edit: async (id, options) => {
+              const current = channel.permissionOverwrites.cache.get(id) || { id };
+              channel.permissionOverwrites.cache.set(id, { ...current, ...options });
+            },
           },
           delete: async () => {
             const index = channels.indexOf(channel);
@@ -87,7 +94,7 @@ test('setup voice limit button opens a modal and applies the user limit', async 
   assert.match(replies[1].content, /4/);
 });
 
-test('setup voice sends an interface embed with owner scoped buttons', async () => {
+test('setup voice sends an interface embed with public room controls', async () => {
   const setup = require('../commands/system/setup');
   const replies = [];
 
@@ -101,9 +108,12 @@ test('setup voice sends an interface embed with owner scoped buttons', async () 
   const ids = replies[0].components.flatMap((row) =>
     row.components.map((component) => component.data.custom_id)
   );
-  assert.ok(ids.includes('setup:voice:user-1:create'));
-  assert.ok(ids.includes('setup:voice:user-1:limit'));
-  assert.ok(ids.includes('setup:voice:user-1:delete'));
+  assert.ok(ids.includes('setup:voice:create'));
+  assert.ok(ids.includes('setup:voice:rename'));
+  assert.ok(ids.includes('setup:voice:limit'));
+  assert.ok(ids.includes('setup:voice:invite'));
+  assert.ok(ids.includes('setup:voice:transfer'));
+  assert.ok(ids.includes('setup:voice:delete'));
 });
 
 test('setup channel create button creates one private text channel per user', async () => {
@@ -153,4 +163,90 @@ test('setup voice create button creates a private voice channel and moves the us
   assert.equal(guild._channels[0].type, ChannelType.GuildVoice);
   assert.equal(moves[0], guild._channels[0].id);
   assert.match(replies[0].content, /Đã tạo/);
+});
+test('setup rename button opens a modal and renames the private room', async () => {
+  const setup = require('../commands/system/setup');
+  const guild = createMockGuild();
+  const modals = [];
+  const replies = [];
+
+  await setup.handleComponent({
+    customId: 'setup:channel:create',
+    user: { id: 'user-1', username: 'Yaiba' },
+    guild,
+    channel: { parentId: 'category-1' },
+    reply: async (payload) => replies.push(payload),
+  });
+
+  await setup.handleComponent({
+    customId: 'setup:channel:rename',
+    user: { id: 'user-1', username: 'Yaiba' },
+    showModal: async (modal) => modals.push(modal),
+  });
+
+  await setup.handleModal({
+    customId: 'setup:channel:user-1:renameModal',
+    user: { id: 'user-1', username: 'Yaiba' },
+    guild,
+    fields: { getTextInputValue: () => 'Phong Rieng Moi' },
+    reply: async (payload) => replies.push(payload),
+  });
+
+  assert.equal(modals[0].data.custom_id, 'setup:channel:user-1:renameModal');
+  assert.equal(guild._channels[0].name, 'phong-rieng-moi');
+});
+
+test('setup invite user select grants access to a private room', async () => {
+  const setup = require('../commands/system/setup');
+  const guild = createMockGuild();
+  const replies = [];
+
+  await setup.handleComponent({
+    customId: 'setup:channel:create',
+    user: { id: 'user-1', username: 'Yaiba' },
+    guild,
+    channel: { parentId: 'category-1' },
+    reply: async (payload) => replies.push(payload),
+  });
+
+  await setup.handleUserSelect({
+    customId: 'setup:channel:user-1:inviteSelect',
+    user: { id: 'user-1', username: 'Yaiba' },
+    guild,
+    values: ['user-2'],
+    reply: async (payload) => replies.push(payload),
+  });
+
+  assert.ok(
+    guild._channels[0].permissionOverwrites.cache
+      .get('user-2')
+      .allow
+      .includes(PermissionFlagsBits.ViewChannel)
+  );
+});
+
+test('setup transfer user select moves room ownership', async () => {
+  const setup = require('../commands/system/setup');
+  const guild = createMockGuild();
+  const replies = [];
+
+  await setup.handleComponent({
+    customId: 'setup:voice:create',
+    user: { id: 'user-1', username: 'Yaiba' },
+    guild,
+    channel: { parentId: 'category-1' },
+    member: { voice: { setChannel: async () => {} } },
+    reply: async (payload) => replies.push(payload),
+  });
+
+  await setup.handleUserSelect({
+    customId: 'setup:voice:user-1:transferSelect',
+    user: { id: 'user-1', username: 'Yaiba' },
+    guild,
+    values: ['user-2'],
+    reply: async (payload) => replies.push(payload),
+  });
+
+  assert.equal(setup._private.findUserRoom(guild, 'voice', 'user-1'), undefined);
+  assert.equal(setup._private.findUserRoom(guild, 'voice', 'user-2'), guild._channels[0]);
 });
