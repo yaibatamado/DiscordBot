@@ -227,5 +227,14 @@ module.exports = (client) => {
         });
       }
     }
+
+    if (interaction.isModalSubmit?.()) {
+      if (interaction.customId.startsWith('setup:')) {
+        const setupCommand = client.slashCommands.get('setup');
+        if (setupCommand?.handleModal) {
+          await setupCommand.handleModal(interaction);
+        }
+      }
+    }
   });
 };

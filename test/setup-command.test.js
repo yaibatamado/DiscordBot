@@ -49,6 +49,44 @@ test('setup slash command exposes voice and channel panels', () => {
   assert.deepEqual(json.options.map((option) => option.name), ['voice', 'channel']);
 });
 
+test('setup voice limit button opens a modal and applies the user limit', async () => {
+  const setup = require('../commands/system/setup');
+  const guild = createMockGuild();
+  const modals = [];
+  const replies = [];
+
+  await setup.handleComponent({
+    customId: 'setup:voice:user-1:create',
+    user: { id: 'user-1', username: 'Yaiba' },
+    guild,
+    channel: { parentId: 'category-1' },
+    member: { voice: { setChannel: async () => {} } },
+    reply: async (payload) => replies.push(payload),
+  });
+
+  await setup.handleComponent({
+    customId: 'setup:voice:user-1:limit',
+    user: { id: 'user-1', username: 'Yaiba' },
+    showModal: async (modal) => modals.push(modal),
+  });
+
+  guild._channels[0].setUserLimit = async (limit) => {
+    guild._channels[0].userLimit = limit;
+  };
+
+  await setup.handleModal({
+    customId: 'setup:voice:user-1:limitModal',
+    user: { id: 'user-1', username: 'Yaiba' },
+    guild,
+    fields: { getTextInputValue: () => '4' },
+    reply: async (payload) => replies.push(payload),
+  });
+
+  assert.equal(modals[0].data.custom_id, 'setup:voice:user-1:limitModal');
+  assert.equal(guild._channels[0].userLimit, 4);
+  assert.match(replies[1].content, /4/);
+});
+
 test('setup voice sends an interface embed with owner scoped buttons', async () => {
   const setup = require('../commands/system/setup');
   const replies = [];
@@ -64,6 +102,7 @@ test('setup voice sends an interface embed with owner scoped buttons', async () 
     row.components.map((component) => component.data.custom_id)
   );
   assert.ok(ids.includes('setup:voice:user-1:create'));
+  assert.ok(ids.includes('setup:voice:user-1:limit'));
   assert.ok(ids.includes('setup:voice:user-1:delete'));
 });
 

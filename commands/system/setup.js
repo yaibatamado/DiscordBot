@@ -4,12 +4,16 @@ const {
   ButtonStyle,
   ChannelType,
   MessageFlags,
+  ModalBuilder,
   PermissionFlagsBits,
   SlashCommandBuilder,
+  TextInputBuilder,
+  TextInputStyle,
 } = require('discord.js');
 const { createEmbed, icons } = require('../../utils/uiEmbed');
 
 const SETUP_PREFIX = 'setup';
+const VOICE_ROOM_PREFIX = '🌙・';
 
 const normalizeName = (name) => (
   name
@@ -23,7 +27,7 @@ const normalizeName = (name) => (
 
 const roomName = (mode, user) => {
   const base = normalizeName(user.username || user.globalName || 'user');
-  return mode === 'voice' ? `🌙・${base}` : `${base}-room`;
+  return mode === 'voice' ? `${VOICE_ROOM_PREFIX}${base}` : `${base}-room`;
 };
 
 const isUserRoom = (channel, mode, userId) => {
@@ -53,8 +57,9 @@ const buildPanelEmbed = (mode) => {
         value: isVoice
           ? [
             '• Mỗi thành viên có một voice riêng.',
-            '• Có thể khóa/mở quyền vào phòng.',
+            '• Có thể khóa/mở quyền vào phòng và đặt giới hạn người vào.',
             '• Bot sẽ chuyển bạn vào phòng sau khi tạo.',
+            '• Voice riêng sẽ tự xóa khi trống.',
           ].join('\n')
           : [
             '• Mỗi thành viên có một text channel riêng.',
@@ -71,14 +76,28 @@ const buildPanelEmbed = (mode) => {
 };
 
 const buttonId = (mode, userId, action) => `${SETUP_PREFIX}:${mode}:${userId}:${action}`;
+const modalId = (mode, userId, action) => `${SETUP_PREFIX}:${mode}:${userId}:${action}Modal`;
 
-const buildPanelComponents = (mode, userId) => [
-  new ActionRowBuilder().addComponents(
+const buildPanelComponents = (mode, userId) => {
+  const buttons = [
     new ButtonBuilder()
       .setCustomId(buttonId(mode, userId, 'create'))
       .setLabel(mode === 'voice' ? 'Tạo Voice' : 'Tạo Channel')
       .setEmoji(mode === 'voice' ? '🎙️' : '#️⃣')
       .setStyle(ButtonStyle.Success),
+  ];
+
+  if (mode === 'voice') {
+    buttons.push(
+      new ButtonBuilder()
+        .setCustomId(buttonId(mode, userId, 'limit'))
+        .setLabel('Giới Hạn')
+        .setEmoji('👥')
+        .setStyle(ButtonStyle.Secondary)
+    );
+  }
+
+  buttons.push(
     new ButtonBuilder()
       .setCustomId(buttonId(mode, userId, 'lock'))
       .setLabel('Khóa')
@@ -94,8 +113,28 @@ const buildPanelComponents = (mode, userId) => [
       .setLabel('Xóa')
       .setEmoji('🗑️')
       .setStyle(ButtonStyle.Danger)
-  ),
-];
+  );
+
+  return [new ActionRowBuilder().addComponents(...buttons)];
+};
+
+const buildLimitModal = (userId) => (
+  new ModalBuilder()
+    .setCustomId(modalId('voice', userId, 'limit'))
+    .setTitle('Giới hạn người vào voice')
+    .addComponents(
+      new ActionRowBuilder().addComponents(
+        new TextInputBuilder()
+          .setCustomId('limit')
+          .setLabel('Số người tối đa')
+          .setPlaceholder('Nhập 0 để bỏ giới hạn, hoặc 1-99')
+          .setRequired(true)
+          .setStyle(TextInputStyle.Short)
+          .setMinLength(1)
+          .setMaxLength(2)
+      )
+    )
+);
 
 const baseOverwrites = (guild, userId, mode) => {
   const allow = mode === 'voice'
@@ -187,11 +226,15 @@ const setRoomPrivacy = async (interaction, mode, locked) => {
     });
   }
 
-  const overwrite = channel.permissionOverwrites.cache.get(interaction.guild.roles.everyone.id);
-  if (overwrite) {
-    overwrite.deny = locked
-      ? [PermissionFlagsBits.ViewChannel, ...(mode === 'voice' ? [PermissionFlagsBits.Connect] : [])]
-      : [];
+  const deny = locked
+    ? [PermissionFlagsBits.ViewChannel, ...(mode === 'voice' ? [PermissionFlagsBits.Connect] : [])]
+    : [];
+
+  if (channel.permissionOverwrites?.edit) {
+    await channel.permissionOverwrites.edit(interaction.guild.roles.everyone.id, { deny });
+  } else {
+    const overwrite = channel.permissionOverwrites.cache.get(interaction.guild.roles.everyone.id);
+    if (overwrite) overwrite.deny = deny;
   }
 
   return interaction.reply({
@@ -200,9 +243,36 @@ const setRoomPrivacy = async (interaction, mode, locked) => {
   });
 };
 
+const setVoiceLimit = async (interaction, limit) => {
+  const channel = findUserRoom(interaction.guild, 'voice', interaction.user.id);
+  if (!channel) {
+    return interaction.reply({
+      content: 'Bạn chưa có voice riêng để đặt giới hạn.',
+      flags: MessageFlags.Ephemeral,
+    });
+  }
+
+  await channel.setUserLimit(limit);
+  return interaction.reply({
+    content: limit === 0
+      ? 'Đã bỏ giới hạn người vào voice riêng của bạn.'
+      : `Đã đặt giới hạn voice riêng thành ${limit} người.`,
+    flags: MessageFlags.Ephemeral,
+  });
+};
+
 const parseSetupButton = (customId) => {
   const [prefix, mode, userId, action] = customId.split(':');
   if (prefix !== SETUP_PREFIX || !['voice', 'channel'].includes(mode) || !userId || !action) {
+    return null;
+  }
+  return { mode, userId, action };
+};
+
+const parseSetupModal = (customId) => {
+  const [prefix, mode, userId, actionWithSuffix] = customId.split(':');
+  const action = actionWithSuffix?.replace(/Modal$/, '');
+  if (prefix !== SETUP_PREFIX || mode !== 'voice' || !userId || action !== 'limit') {
     return null;
   }
   return { mode, userId, action };
@@ -239,6 +309,11 @@ const handleComponent = async (interaction) => {
     return true;
   }
 
+  if (parsed.action === 'limit' && parsed.mode === 'voice') {
+    await interaction.showModal(buildLimitModal(interaction.user.id));
+    return true;
+  }
+
   if (parsed.action === 'lock' || parsed.action === 'unlock') {
     await setRoomPrivacy(interaction, parsed.mode, parsed.action === 'lock');
     return true;
@@ -248,6 +323,32 @@ const handleComponent = async (interaction) => {
     content: 'Nút này chưa được hỗ trợ.',
     flags: MessageFlags.Ephemeral,
   });
+  return true;
+};
+
+const handleModal = async (interaction) => {
+  const parsed = parseSetupModal(interaction.customId);
+  if (!parsed) return false;
+
+  if (parsed.userId !== interaction.user.id) {
+    await interaction.reply({
+      content: 'Đây không phải modal setup của bạn.',
+      flags: MessageFlags.Ephemeral,
+    });
+    return true;
+  }
+
+  const rawLimit = interaction.fields.getTextInputValue('limit').trim();
+  const limit = Number(rawLimit);
+  if (!Number.isInteger(limit) || limit < 0 || limit > 99) {
+    await interaction.reply({
+      content: 'Giới hạn phải là số từ 0 đến 99.',
+      flags: MessageFlags.Ephemeral,
+    });
+    return true;
+  }
+
+  await setVoiceLimit(interaction, limit);
   return true;
 };
 
@@ -270,15 +371,21 @@ module.exports = {
 
   execute: executeSetup,
   handleComponent,
+  handleModal,
 
   _private: {
+    VOICE_ROOM_PREFIX,
+    buildLimitModal,
     buildPanelEmbed,
     buildPanelComponents,
     createRoom,
     deleteRoom,
     findUserRoom,
+    isUserRoom,
     parseSetupButton,
+    parseSetupModal,
     roomName,
     setRoomPrivacy,
+    setVoiceLimit,
   },
 };
