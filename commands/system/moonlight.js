@@ -1,4 +1,9 @@
-const { SlashCommandBuilder } = require('discord.js');
+const {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  SlashCommandBuilder,
+} = require('discord.js');
 const { createEmbed, icons } = require('../../utils/uiEmbed');
 const { clientId } = require('../../config/app');
 const packageJson = require('../../package.json');
@@ -22,6 +27,13 @@ const buildInviteUrl = () => {
   return `https://discord.com/oauth2/authorize?client_id=${clientId}&permissions=${permissions}&scope=${scopes}`;
 };
 
+const buildInviteRow = () => new ActionRowBuilder().addComponents(
+  new ButtonBuilder()
+    .setLabel('Invite Moonlight')
+    .setStyle(ButtonStyle.Link)
+    .setURL(buildInviteUrl())
+);
+
 const buildMoonlightEmbed = (client) => createEmbed({
   title: 'Moonlight',
   description: [
@@ -37,7 +49,7 @@ const buildMoonlightEmbed = (client) => createEmbed({
     { name: 'Uptime', value: formatUptime(client.uptime), inline: true },
     { name: 'Servers', value: String(client.guilds?.cache?.size ?? 0), inline: true },
     { name: 'Main Commands', value: '`/help` `/pet` `/setup` `/mod` `/server`', inline: false },
-    { name: 'Invite', value: `[Invite Moonlight](${buildInviteUrl()})`, inline: false },
+    { name: 'Invite', value: `[Invite Moonlight](${buildInviteUrl()})\nPermission: **Administrator**`, inline: false },
   ],
   footer: 'Moonlight System',
 });
@@ -53,10 +65,12 @@ module.exports = {
   async execute(interaction) {
     return interaction.reply({
       embeds: [buildMoonlightEmbed(interaction.client)],
+      components: [buildInviteRow()],
     });
   },
 
   _private: {
+    buildInviteRow,
     buildInviteUrl,
     buildMoonlightEmbed,
     formatUptime,
