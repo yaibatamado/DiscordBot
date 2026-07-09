@@ -8,6 +8,6 @@ module.exports = {
   permission: 'everyone',
 
   execute(message) {
-    message.reply(buildMainHelp(commands));
+    message.reply(buildMainHelp(commands, message.author));
   },
 };

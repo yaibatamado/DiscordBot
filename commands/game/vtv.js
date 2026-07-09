@@ -8,15 +8,20 @@ module.exports = {
 
   category: 'game',
   label: '🧠 Vua TV',
-  
+
   data: {
-    title: 'HƯỚNG DẪN CHƠI VUA TIẾNG VIỆT',
-    description: '🧠 start!'
+    title: 'Hướng dẫn Vua Tiếng Việt',
+    description: [
+      '`?vuatv` hoặc `?vtv`: mở hướng dẫn Vua Tiếng Việt.',
+      '',
+      'Lệnh thường dùng:',
+      '`start!`: bắt đầu chơi',
+    ].join('\n'),
   },
 
   execute(message) {
     message.reply({
-      embeds: [embed(this.data.title, this.data.description)]
+      embeds: [embed(this.data.title, this.data.description)],
     });
-  }
+  },
 };

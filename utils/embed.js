@@ -3,8 +3,8 @@ const { COLOR } = require('../config');
 
 module.exports = (title, desc) => {
   return new EmbedBuilder()
-    .setTitle(`${title}`)
-    .setDescription(`🛰️ Đang truy xuất dữ liệu...\n\n${desc}`)
+    .setTitle(title)
+    .setDescription(desc)
     .setColor(COLOR)
-    .setFooter({ text: '⚙️ TACTICAL SYSTEM ACTIVE' });
+    .setFooter({ text: 'Moonlight' });
 };

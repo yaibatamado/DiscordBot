@@ -8,6 +8,6 @@ module.exports = {
     .setDescription('Hiển thị danh sách lệnh của bot'),
 
   async execute(interaction) {
-    return interaction.reply(buildMainHelp(commands));
+    return interaction.reply(buildMainHelp(commands, interaction.user));
   },
 };

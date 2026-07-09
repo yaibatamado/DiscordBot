@@ -39,43 +39,64 @@ test('slash loader only registers slash commands with slash metadata', () => {
 
   loadSlash(client);
 
-  assert.deepEqual([...client.slashCommands.keys()].sort(), ['help', 'mod']);
+  assert.deepEqual([...client.slashCommands.keys()].sort(), [
+    'avatar',
+    'dbstatus',
+    'help',
+    'join',
+    'leave',
+    'mod',
+    'pet',
+    'warn',
+  ]);
 });
 
-test('prefix help menu shows every command category automatically', () => {
+test('prefix help replies with a command list embed', () => {
   const handler = freshRequire('../handlers/commandHandler');
   const help = freshRequire('../commands/system/help');
   const replies = [];
 
   handler.loadCommands();
   help.execute({
+    author: {
+      username: 'Tester',
+      displayAvatarURL: () => 'https://example.com/avatar.png',
+    },
     reply: (payload) => replies.push(payload),
   });
 
-  const options = replies[0].components[0].components[0].options;
-  assert.deepEqual(options.map((option) => option.data.value).sort(), [
-    'game',
-    'music',
-    'system',
-  ]);
+  assert.equal(replies[0].components, undefined);
+  const embed = replies[0].embeds[0];
+  assert.equal(embed.data.title, '🌙 Moonlight Help!');
+  assert.match(embed.data.fields.map((field) => field.name).join('\n'), /System/);
+  assert.match(embed.data.fields.map((field) => field.name).join('\n'), /Game/);
+  assert.match(embed.data.fields.map((field) => field.name).join('\n'), /Music/);
+  assert.match(embed.data.fields.map((field) => field.name).join('\n'), /Moderation/);
+  assert.match(embed.data.fields.map((field) => field.value).join('\n'), /\?help/);
+  assert.match(embed.data.fields.map((field) => field.value).join('\n'), /\/help/);
+  assert.match(embed.data.fields.map((field) => field.value).join('\n'), /\?server/);
+  assert.match(embed.data.fields.map((field) => field.value).join('\n'), /\/mod kick/);
 });
 
-test('slash help replies with every command category', async () => {
+test('slash help replies with a command list embed', async () => {
   const handler = freshRequire('../handlers/commandHandler');
   const slashHelp = freshRequire('../commands/system/slashHelp');
   const replies = [];
 
   handler.loadCommands();
   await slashHelp.execute({
+    user: {
+      username: 'SlashTester',
+      displayAvatarURL: () => 'https://example.com/slash-avatar.png',
+    },
     reply: async (payload) => replies.push(payload),
   });
 
-  const options = replies[0].components[0].components[0].options;
-  assert.deepEqual(options.map((option) => option.data.value).sort(), [
-    'game',
-    'music',
-    'system',
-  ]);
+  assert.equal(replies[0].components, undefined);
+  const embed = replies[0].embeds[0];
+  assert.equal(embed.data.author.name, 'SlashTester');
+  assert.match(embed.data.fields.map((field) => field.value).join('\n'), /\?nhac/);
+  assert.match(embed.data.fields.map((field) => field.value).join('\n'), /\?baucua/);
 });
 
 test('moderation kick fetches the target member before acting', async () => {

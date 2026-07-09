@@ -6,17 +6,25 @@ module.exports = {
   cooldown: 5,
   permission: 'everyone',
 
-  category: 'game', // 🔥 QUAN TRỌNG
-  label: '🔤 Nối từ', // 🔥 hiển thị menu
-  
+  category: 'game',
+  label: '🔤 Nối từ',
+
   data: {
-    title: 'HƯỚNG DẪN CHƠI NỐI TỪ',
-    description: '🔤 start!\n🛑 stop!\n\n📊 nme\n📊 nrank'
+    title: 'Hướng dẫn Nối Từ',
+    description: [
+      '`?noitu` hoặc `?nt`: mở hướng dẫn Nối Từ.',
+      '',
+      'Lệnh thường dùng:',
+      '`start!`: bắt đầu ván',
+      '`stop!`: dừng ván',
+      '`nme`: xem điểm của bạn',
+      '`nrank`: xem bảng xếp hạng',
+    ].join('\n'),
   },
 
   execute(message) {
     message.reply({
-      embeds: [embed(this.data.title, this.data.description)]
+      embeds: [embed(this.data.title, this.data.description)],
     });
-  }
+  },
 };

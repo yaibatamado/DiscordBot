@@ -10,13 +10,29 @@ module.exports = {
   label: '🎵 Nhạc',
 
   data: {
-    title: 'HƯỚNG DẪN SỬ DỤNG JOOKIE MUSIC',
-    description: '▶️ m!play <url/tên>\n⏭️ m!skip\n⏹️ m!stop\n\n🔁 m!loop\n🔁 m!repeat queue\n🔀 m!shuffle\n\n📜 m!queue\n🗑️ m!clear'
+    title: 'Hướng dẫn Jookie Music',
+    description: [
+      '`?nhac` hoặc `?nh`: mở hướng dẫn dùng Jookie Music.',
+      '',
+      'Lệnh phát nhạc:',
+      '`m!play <url/tên>`: phát bài hát',
+      '`m!skip`: bỏ qua bài hiện tại',
+      '`m!stop`: dừng phát nhạc',
+      '',
+      'Hàng chờ:',
+      '`m!queue`: xem hàng chờ',
+      '`m!clear`: xóa hàng chờ',
+      '`m!shuffle`: trộn hàng chờ',
+      '',
+      'Lặp nhạc:',
+      '`m!loop`: bật/tắt lặp',
+      '`m!repeat queue`: lặp cả hàng chờ',
+    ].join('\n'),
   },
 
   execute(message) {
     message.reply({
-      embeds: [embed(this.data.title, this.data.description)]
+      embeds: [embed(this.data.title, this.data.description)],
     });
-  }
+  },
 };

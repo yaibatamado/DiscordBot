@@ -30,8 +30,8 @@ const buildMain = () => {
 
   return {
     embed: embed(
-      'TRUNG TÂM CHỈ HUY',
-      '🔓 Chọn hệ thống để truy cập'
+      '🌙 MOONLIGHT',
+      'Chọn khu vực bạn muốn mở dưới ánh trăng.'
     ),
     components: [
       new ActionRowBuilder().addComponents(
@@ -130,6 +130,17 @@ module.exports = (client) => {
     }
     // ===== DROPDOWN =====
     if (interaction.isStringSelectMenu()) {
+      if (
+        interaction.customId.startsWith('petshop:') ||
+        interaction.customId.startsWith('petadventure:') ||
+        interaction.customId.startsWith('petpartyjoin:')
+      ) {
+        const petCommand = client.slashCommands.get('pet');
+        if (petCommand?.handleComponent) {
+          await petCommand.handleComponent(interaction);
+          return;
+        }
+      }
 
       const msgId = interaction.message.id;
 
@@ -174,6 +185,17 @@ module.exports = (client) => {
 
     // ===== BACK =====
     if (interaction.isButton()) {
+      if (
+        interaction.customId.startsWith('pet:') ||
+        interaction.customId.startsWith('petbuy:') ||
+        interaction.customId.startsWith('petparty:')
+      ) {
+        const petCommand = client.slashCommands.get('pet');
+        if (petCommand?.handleComponent) {
+          await petCommand.handleComponent(interaction);
+          return;
+        }
+      }
 
       if (interaction.customId === 'back') {
 
