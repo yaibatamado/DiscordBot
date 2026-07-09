@@ -24,4 +24,5 @@ jobs:
       - name: Deploy slash commands
         run: node deploy-commands.js
         env:
-          TOKEN: ${{ secrets.TOKEN }}
+          BOT: ${{ secrets.BOT }}
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}

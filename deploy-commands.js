@@ -22,12 +22,13 @@ for (const folder of folders) {
 (async () => {
   try {
     const applicationId = process.env.CLIENT_ID || clientId;
+    const botToken = process.env.TOKEN || process.env.BOT;
 
-    if (!process.env.TOKEN || !applicationId) {
-      throw new Error('Missing required env: TOKEN and application client id');
+    if (!botToken || !applicationId) {
+      throw new Error('Missing required env: TOKEN/BOT and application client id');
     }
 
-    const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
+    const rest = new REST({ version: '10' }).setToken(botToken);
 
     console.log(`Deploying ${commands.length} slash commands...`);
 
