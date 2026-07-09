@@ -25,4 +25,3 @@ jobs:
         run: node deploy-commands.js
         env:
           TOKEN: ${{ secrets.TOKEN }}
-          CLIENT_ID: ${{ secrets.CLIENT_ID }}

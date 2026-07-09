@@ -1,6 +1,7 @@
 require('dotenv').config();
 const { REST, Routes } = require('discord.js');
 const fs = require('fs');
+const { clientId } = require('./config/app');
 
 const commands = [];
 
@@ -20,8 +21,10 @@ for (const folder of folders) {
 
 (async () => {
   try {
-    if (!process.env.TOKEN || !process.env.CLIENT_ID) {
-      throw new Error('Missing required env: TOKEN and CLIENT_ID');
+    const applicationId = process.env.CLIENT_ID || clientId;
+
+    if (!process.env.TOKEN || !applicationId) {
+      throw new Error('Missing required env: TOKEN and application client id');
     }
 
     const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
@@ -29,7 +32,7 @@ for (const folder of folders) {
     console.log(`Deploying ${commands.length} slash commands...`);
 
     await rest.put(
-      Routes.applicationCommands(process.env.CLIENT_ID),
+      Routes.applicationCommands(applicationId),
       { body: commands }
     );
 
