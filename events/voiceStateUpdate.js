@@ -15,7 +15,7 @@ const cleanupPrivateVoice = async (channel) => {
 };
 
 const canSendToChannel = (channel, guild) => {
-  if (channel?.type !== ChannelType.GuildText || typeof channel.send !== 'function') {
+  if (!channel || typeof channel.send !== 'function') {
     return false;
   }
 
@@ -26,15 +26,19 @@ const canSendToChannel = (channel, guild) => {
     && permissions.has(PermissionFlagsBits.SendMessages);
 };
 
-const findVoiceNotifyChannel = (guild) => {
-  if (canSendToChannel(guild.systemChannel, guild)) {
-    return guild.systemChannel;
-  }
+const mentionVoice = (channel) => `<#${channel.id}>`;
 
-  return guild.channels.cache.find((channel) => canSendToChannel(channel, guild));
+const buildVoiceJoinMessage = (state) => {
+  const member = state.member;
+  const userLabel = member?.user ? `<@${member.user.id}>` : `<@${state.id}>`;
+  return `🎙️ ${userLabel} đã vào voice ${mentionVoice(state.channel)}.`;
 };
 
-const mentionVoice = (channel) => `<#${channel.id}>`;
+const buildVoiceLeaveMessage = (state) => {
+  const member = state.member;
+  const userLabel = member?.user ? `<@${member.user.id}>` : `<@${state.id}>`;
+  return `📤 ${userLabel} đã rời voice ${mentionVoice(state.channel)}.`;
+};
 
 const buildVoiceActivityMessage = (oldState, newState) => {
   const member = newState.member || oldState.member;
@@ -58,13 +62,20 @@ const buildVoiceActivityMessage = (oldState, newState) => {
 const notifyVoiceActivity = async (oldState, newState) => {
   if (oldState.channelId === newState.channelId) return false;
 
-  const message = buildVoiceActivityMessage(oldState, newState);
-  if (!message) return false;
+  const guild = newState.guild || oldState.guild;
+  const sends = [];
 
-  const channel = findVoiceNotifyChannel(newState.guild || oldState.guild);
-  if (!channel) return false;
+  if (oldState.channel && canSendToChannel(oldState.channel, guild)) {
+    sends.push(oldState.channel.send({ content: buildVoiceLeaveMessage(oldState) }));
+  }
 
-  await channel.send({ content: message });
+  if (newState.channel && canSendToChannel(newState.channel, guild)) {
+    sends.push(newState.channel.send({ content: buildVoiceJoinMessage(newState) }));
+  }
+
+  if (sends.length === 0) return false;
+
+  await Promise.all(sends);
   return true;
 };
 
@@ -82,8 +93,9 @@ module.exports = (client) => {
 
 module.exports._private = {
   buildVoiceActivityMessage,
+  buildVoiceJoinMessage,
+  buildVoiceLeaveMessage,
   cleanupPrivateVoice,
-  findVoiceNotifyChannel,
   isPrivateVoiceRoom,
   notifyVoiceActivity,
 };

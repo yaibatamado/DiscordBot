@@ -41,9 +41,9 @@ test('setup voice cleanup skips non-empty private voice rooms and text rooms', a
   assert.equal(text._calls.length, 0);
 });
 
-const textChannel = (id, sent = [], allowed = true) => ({
+const voiceChannel = (id, sent = [], allowed = true) => ({
   id,
-  type: ChannelType.GuildText,
+  type: ChannelType.GuildVoice,
   permissionsFor: () => ({
     has: (permission) => allowed
       && [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages].includes(permission),
@@ -51,19 +51,8 @@ const textChannel = (id, sent = [], allowed = true) => ({
   send: async (payload) => sent.push(payload),
 });
 
-const voiceChannel = (id) => ({
-  id,
-  type: ChannelType.GuildVoice,
-});
-
-const guildWithChannels = (channels, systemChannel = null) => ({
-  systemChannel,
+const guildWithChannels = () => ({
   members: { me: { id: 'bot-1' } },
-  channels: {
-    cache: {
-      find: (predicate) => channels.find(predicate),
-    },
-  },
 });
 
 test('voice activity notification reports join, leave, and move', () => {
@@ -97,34 +86,47 @@ test('voice activity notification reports join, leave, and move', () => {
   );
 });
 
-test('voice activity notification sends to system channel first', async () => {
+test('voice activity notification sends join to the joined voice channel chat', async () => {
   const voice = require('../events/voiceStateUpdate');
   const sent = [];
-  const systemChannel = textChannel('system', sent);
-  const fallbackChannel = textChannel('fallback', sent);
-  const guild = guildWithChannels([fallbackChannel], systemChannel);
+  const guild = guildWithChannels();
 
   await voice._private.notifyVoiceActivity(
     { guild, channel: null, channelId: null, member: { user: { id: 'user-1' } }, id: 'user-1' },
-    { guild, channel: voiceChannel('voice-1'), channelId: 'voice-1', member: { user: { id: 'user-1' } }, id: 'user-1' }
+    { guild, channel: voiceChannel('voice-1', sent), channelId: 'voice-1', member: { user: { id: 'user-1' } }, id: 'user-1' }
   );
 
   assert.equal(sent.length, 1);
-  assert.match(sent[0].content, /<#voice-1>/);
+  assert.match(sent[0].content, /vào voice <#voice-1>/);
 });
 
-test('voice activity notification falls back to first sendable text channel', async () => {
+test('voice activity notification sends leave to the left voice channel chat', async () => {
   const voice = require('../events/voiceStateUpdate');
   const sent = [];
-  const blockedSystem = textChannel('system', sent, false);
-  const fallbackChannel = textChannel('fallback', sent);
-  const guild = guildWithChannels([fallbackChannel], blockedSystem);
+  const guild = guildWithChannels();
 
   await voice._private.notifyVoiceActivity(
-    { guild, channel: voiceChannel('voice-1'), channelId: 'voice-1', member: { user: { id: 'user-1' } }, id: 'user-1' },
+    { guild, channel: voiceChannel('voice-1', sent), channelId: 'voice-1', member: { user: { id: 'user-1' } }, id: 'user-1' },
     { guild, channel: null, channelId: null, member: { user: { id: 'user-1' } }, id: 'user-1' }
   );
 
   assert.equal(sent.length, 1);
-  assert.match(sent[0].content, /rời voice/);
+  assert.match(sent[0].content, /rời voice <#voice-1>/);
+});
+
+test('voice activity notification sends move to both voice channel chats', async () => {
+  const voice = require('../events/voiceStateUpdate');
+  const oldSent = [];
+  const newSent = [];
+  const guild = guildWithChannels();
+
+  await voice._private.notifyVoiceActivity(
+    { guild, channel: voiceChannel('old-voice', oldSent), channelId: 'old-voice', member: { user: { id: 'user-1' } }, id: 'user-1' },
+    { guild, channel: voiceChannel('new-voice', newSent), channelId: 'new-voice', member: { user: { id: 'user-1' } }, id: 'user-1' }
+  );
+
+  assert.equal(oldSent.length, 1);
+  assert.equal(newSent.length, 1);
+  assert.match(oldSent[0].content, /rời voice <#old-voice>/);
+  assert.match(newSent[0].content, /vào voice <#new-voice>/);
 });
