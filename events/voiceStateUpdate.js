@@ -36,7 +36,7 @@ const buildVoiceJoinMessage = (state) => {
 
 const buildVoiceLeaveMessage = (state) => {
   const member = state.member;
-  const userLabel = member?.user ? `<@${member.user.id}>` : `<@${state.id}>`;
+  const userLabel = member?.displayName || member?.user?.globalName || member?.user?.username || 'Ai đó';
   return `📤 ${userLabel} đã rời voice ${mentionVoice(state.channel)}.`;
 };
 

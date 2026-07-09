@@ -57,7 +57,7 @@ const guildWithChannels = () => ({
 
 test('voice activity notification reports join, leave, and move', () => {
   const voice = require('../events/voiceStateUpdate');
-  const member = { user: { id: 'user-1' } };
+  const member = { displayName: 'Yaiba', user: { id: 'user-1' } };
   const oldVoice = voiceChannel('old-voice');
   const newVoice = voiceChannel('new-voice');
 
@@ -92,8 +92,8 @@ test('voice activity notification sends join to the joined voice channel chat', 
   const guild = guildWithChannels();
 
   await voice._private.notifyVoiceActivity(
-    { guild, channel: null, channelId: null, member: { user: { id: 'user-1' } }, id: 'user-1' },
-    { guild, channel: voiceChannel('voice-1', sent), channelId: 'voice-1', member: { user: { id: 'user-1' } }, id: 'user-1' }
+    { guild, channel: null, channelId: null, member: { displayName: 'Yaiba', user: { id: 'user-1' } }, id: 'user-1' },
+    { guild, channel: voiceChannel('voice-1', sent), channelId: 'voice-1', member: { displayName: 'Yaiba', user: { id: 'user-1' } }, id: 'user-1' }
   );
 
   assert.equal(sent.length, 1);
@@ -106,8 +106,8 @@ test('voice activity notification sends leave to the left voice channel chat', a
   const guild = guildWithChannels();
 
   await voice._private.notifyVoiceActivity(
-    { guild, channel: voiceChannel('voice-1', sent), channelId: 'voice-1', member: { user: { id: 'user-1' } }, id: 'user-1' },
-    { guild, channel: null, channelId: null, member: { user: { id: 'user-1' } }, id: 'user-1' }
+    { guild, channel: voiceChannel('voice-1', sent), channelId: 'voice-1', member: { displayName: 'Yaiba', user: { id: 'user-1' } }, id: 'user-1' },
+    { guild, channel: null, channelId: null, member: { displayName: 'Yaiba', user: { id: 'user-1' } }, id: 'user-1' }
   );
 
   assert.equal(sent.length, 1);
@@ -121,8 +121,8 @@ test('voice activity notification sends move to both voice channel chats', async
   const guild = guildWithChannels();
 
   await voice._private.notifyVoiceActivity(
-    { guild, channel: voiceChannel('old-voice', oldSent), channelId: 'old-voice', member: { user: { id: 'user-1' } }, id: 'user-1' },
-    { guild, channel: voiceChannel('new-voice', newSent), channelId: 'new-voice', member: { user: { id: 'user-1' } }, id: 'user-1' }
+    { guild, channel: voiceChannel('old-voice', oldSent), channelId: 'old-voice', member: { displayName: 'Yaiba', user: { id: 'user-1' } }, id: 'user-1' },
+    { guild, channel: voiceChannel('new-voice', newSent), channelId: 'new-voice', member: { displayName: 'Yaiba', user: { id: 'user-1' } }, id: 'user-1' }
   );
 
   assert.equal(oldSent.length, 1);
