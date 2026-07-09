@@ -5,7 +5,8 @@ const {
   ActionRowBuilder, 
   StringSelectMenuBuilder, 
   ButtonBuilder, 
-  ButtonStyle 
+  ButtonStyle,
+  MessageFlags,
 } = require('discord.js');
 
 const history = new Map();
@@ -124,7 +125,7 @@ module.exports = (client) => {
         console.error(err);
         return interaction.reply({
           content: '❌ Lỗi command',
-          ephemeral: true
+          flags: MessageFlags.Ephemeral
         });
       }
     }

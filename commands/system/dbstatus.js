@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { MessageFlags, SlashCommandBuilder } = require('discord.js');
 const db = require('../../utils/db');
 const { createEmbed, icons } = require('../../utils/uiEmbed');
 
@@ -8,7 +8,7 @@ module.exports = {
     .setDescription('Kiểm tra kết nối SQL Server'),
 
   async execute(interaction) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     try {
       await db.testConnection();

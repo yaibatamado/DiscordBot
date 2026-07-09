@@ -1,4 +1,4 @@
-const { PermissionFlagsBits, SlashCommandBuilder } = require('discord.js');
+const { MessageFlags, PermissionFlagsBits, SlashCommandBuilder } = require('discord.js');
 const { createEmbed, icons } = require('../../utils/uiEmbed');
 
 module.exports = {
@@ -20,7 +20,7 @@ module.exports = {
     if (!interaction.member.permissions.has(PermissionFlagsBits.ModerateMembers)) {
       return interaction.reply({
         content: '❌ Không có quyền cảnh cáo thành viên',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 

@@ -6,7 +6,7 @@ function freshRequire(modulePath) {
   return require(modulePath);
 }
 
-test('prefix command loader only registers named prefix commands', () => {
+test('prefix command loader only registers active prefix commands', () => {
   const handler = freshRequire('../handlers/commandHandler');
 
   handler.loadCommands();
@@ -14,26 +14,20 @@ test('prefix command loader only registers named prefix commands', () => {
   assert.equal(handler.commands.has(undefined), false);
   assert.deepEqual([...handler.commands.keys()].sort(), [
     'av',
-    'baucua',
     'help',
-    'nhac',
-    'noitu',
     'server',
-    'vuatv',
-    'xuxi',
   ]);
 });
 
-test('aliases are unique and nt resolves to noitu', () => {
+test('aliases are unique and avatar resolves to av', () => {
   const handler = freshRequire('../handlers/commandHandler');
 
   handler.loadCommands();
 
-  assert.equal(handler.aliases.get('nt'), 'noitu');
-  assert.equal(handler.aliases.get('nh'), 'nhac');
+  assert.equal(handler.aliases.get('avatar'), 'av');
 });
 
-test('slash loader only registers slash commands with slash metadata', () => {
+test('slash loader registers the public slash command set', () => {
   const client = {};
   const loadSlash = freshRequire('../handlers/slashLoader');
 
@@ -46,6 +40,8 @@ test('slash loader only registers slash commands with slash metadata', () => {
     'join',
     'leave',
     'mod',
+    'moonlight',
+    'music',
     'pet',
     'server',
     'setup',
@@ -69,15 +65,22 @@ test('prefix help replies with a command list embed', () => {
 
   assert.equal(replies[0].components, undefined);
   const embed = replies[0].embeds[0];
-  assert.equal(embed.data.title, '🌙 Moonlight Help!');
-  assert.match(embed.data.fields.map((field) => field.name).join('\n'), /System/);
-  assert.match(embed.data.fields.map((field) => field.name).join('\n'), /Game/);
-  assert.match(embed.data.fields.map((field) => field.name).join('\n'), /Music/);
-  assert.match(embed.data.fields.map((field) => field.name).join('\n'), /Moderation/);
-  assert.match(embed.data.fields.map((field) => field.value).join('\n'), /\?help/);
-  assert.match(embed.data.fields.map((field) => field.value).join('\n'), /\/help/);
-  assert.match(embed.data.fields.map((field) => field.value).join('\n'), /\?server/);
-  assert.match(embed.data.fields.map((field) => field.value).join('\n'), /\/mod kick/);
+  const fieldNames = embed.data.fields.map((field) => field.name).join('\n');
+  const fieldValues = embed.data.fields.map((field) => field.value).join('\n');
+
+  assert.equal(embed.data.title, 'Moonlight Help!');
+  assert.match(fieldNames, /System/);
+  assert.match(fieldNames, /Pet/);
+  assert.match(fieldNames, /Music/);
+  assert.match(fieldNames, /Moderation/);
+  assert.match(fieldValues, /\?help/);
+  assert.match(fieldValues, /\/help/);
+  assert.match(fieldValues, /\/moonlight/);
+  assert.match(fieldValues, /\?server/);
+  assert.match(fieldValues, /\/music/);
+  assert.match(fieldValues, /\/mod kick/);
+  assert.doesNotMatch(fieldValues, /\?baucua/);
+  assert.doesNotMatch(fieldValues, /\?nhac/);
 });
 
 test('slash help replies with a command list embed', async () => {
@@ -96,9 +99,12 @@ test('slash help replies with a command list embed', async () => {
 
   assert.equal(replies[0].components, undefined);
   const embed = replies[0].embeds[0];
+  const fieldValues = embed.data.fields.map((field) => field.value).join('\n');
+
   assert.equal(embed.data.author.name, 'SlashTester');
-  assert.match(embed.data.fields.map((field) => field.value).join('\n'), /\?nhac/);
-  assert.match(embed.data.fields.map((field) => field.value).join('\n'), /\?baucua/);
+  assert.match(fieldValues, /\/music/);
+  assert.match(fieldValues, /\/pet/);
+  assert.match(fieldValues, /\/moonlight/);
 });
 
 test('moderation kick fetches the target member before acting', async () => {
@@ -136,4 +142,3 @@ test('moderation kick fetches the target member before acting', async () => {
   assert.match(calls[2].embeds[0].data.title, /Member Kicked/);
   assert.match(calls[2].embeds[0].data.description, /TestUser#0001/);
 });
-

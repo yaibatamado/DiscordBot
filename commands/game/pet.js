@@ -2,6 +2,7 @@ const {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  MessageFlags,
   SlashCommandBuilder,
   StringSelectMenuBuilder,
 } = require('discord.js');
@@ -653,7 +654,7 @@ const sendOrUpdate = async (interaction, payload) => {
     return interaction.update(payload);
   }
 
-  return interaction.reply({ ...payload, ephemeral: true });
+  return interaction.reply({ ...payload, flags: MessageFlags.Ephemeral });
 };
 
 const replyResult = async (interaction, result) => {
@@ -782,7 +783,7 @@ module.exports = {
     } catch (err) {
       return interaction.reply({
         content: `❌ Chưa kết nối được SQL Server cho hệ pet.\n\`${err.message}\``,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },
@@ -794,7 +795,7 @@ module.exports = {
     if (parsed.userId !== interaction.user.id) {
       await interaction.reply({
         content: 'Đây không phải menu pet của bạn.',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return true;
     }
@@ -922,14 +923,14 @@ module.exports = {
     } catch (err) {
       await interaction.reply({
         content: `❌ Chưa xử lý được thao tác pet.\n\`${err.message}\``,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return true;
     }
 
     await interaction.reply({
       content: 'Chức năng này sẽ được mở ở phase sau.',
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
     return true;
   },
