@@ -11,18 +11,20 @@ const colors = {
   system: 0x9b8cff,
 };
 
+const moonlightImage = 'https://raw.githubusercontent.com/yaibatamado/DiscordBot/main/assets/moonlight.jpg';
+
 const icons = {
-  petEgg: 'https://placehold.co/256x256/f7d774/2b2d31/png?text=%F0%9F%A5%9A',
-  pet: 'https://placehold.co/900x500/3b2f4a/f7d774/png?text=Pet',
-  system: 'https://placehold.co/256x256/9b8cff/ffffff/png?text=Moonlight',
-  warning: 'https://placehold.co/256x256/fec84b/2b2d31/png?text=!',
+  petEgg: moonlightImage,
+  pet: moonlightImage,
+  system: moonlightImage,
+  warning: moonlightImage,
 };
 
 const createEmbed = ({
   title,
   description,
   variant = 'default',
-  thumbnail,
+  thumbnail = icons.system,
   image,
   author,
   fields = [],

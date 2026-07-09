@@ -90,7 +90,7 @@ const buildDetail = (cmd) => {
       new ActionRowBuilder().addComponents(
         new ButtonBuilder()
           .setCustomId('back')
-          .setLabel('⬅️ Quay lại')
+          .setLabel('Back')
           .setStyle(ButtonStyle.Secondary)
       )
     ]
@@ -102,7 +102,7 @@ const buildDetail = (cmd) => {
 const backBtn = new ActionRowBuilder().addComponents(
   new ButtonBuilder()
     .setCustomId('back')
-    .setLabel('⬅️ Quay lại')
+    .setLabel('Back')
     .setStyle(ButtonStyle.Secondary)
 );
 

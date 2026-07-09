@@ -68,7 +68,7 @@ const button = (userId, action, label, emoji, style = ButtonStyle.Secondary, dis
 
 const buildPetButtons = (userId, pet) => {
   const primaryAction = !pet
-    ? button(userId, 'hatch', 'Ấp trứng', '🥚', ButtonStyle.Success)
+    ? button(userId, 'hatch', 'Hatch', '🥚', ButtonStyle.Success)
     : pet.status === 'incubating'
       ? button(userId, 'claim', 'Claim', '🎉', ButtonStyle.Success)
       : button(userId, 'home', 'Pet', '🐾', ButtonStyle.Primary);
@@ -76,15 +76,15 @@ const buildPetButtons = (userId, pet) => {
   return [
     new ActionRowBuilder().addComponents(
       primaryAction,
-      button(userId, 'inventory', 'Hành Trang', '🎒'),
-      button(userId, 'daily', 'Phúc Lợi', '🎁'),
-      button(userId, 'refresh', 'Làm Mới', '🔄')
+      button(userId, 'inventory', 'Inventory', '🎒'),
+      button(userId, 'daily', 'Daily', '🎁'),
+      button(userId, 'refresh', 'Refresh', '🔄')
     ),
     new ActionRowBuilder().addComponents(
-      button(userId, 'adventure', 'Phiêu Lưu', '🗺️', ButtonStyle.Success),
-      button(userId, 'heal', 'Chữa Trị', '🧪', ButtonStyle.Success),
-      button(userId, 'breakthrough', 'Đột Phá', '⬆️', ButtonStyle.Primary),
-      button(userId, 'shop', 'Cửa Hàng', '🏪', ButtonStyle.Primary),
+      button(userId, 'adventure', 'Adventure', '🗺️', ButtonStyle.Success),
+      button(userId, 'heal', 'Heal', '🧪', ButtonStyle.Success),
+      button(userId, 'breakthrough', 'Breakthrough', '⬆️', ButtonStyle.Primary),
+      button(userId, 'shop', 'Shop', '🏪', ButtonStyle.Primary),
       button(userId, 'party', 'Party', '👥')
     ),
   ];
@@ -326,7 +326,7 @@ const buildAdventureAreaComponents = (userId) => [
       })))
   ),
   new ActionRowBuilder().addComponents(
-    button(userId, 'home', 'Quay Lại', '⬅️')
+    button(userId, 'home', 'Back', '⬅️')
   ),
 ];
 
@@ -472,7 +472,7 @@ const buildShopComponents = (userId, catalog, selectedItemKey) => {
     return [
       selectRow,
       new ActionRowBuilder().addComponents(
-        button(userId, 'home', 'Quay Lại', '⬅️')
+        button(userId, 'home', 'Back', '⬅️')
       ),
     ];
   }
@@ -483,10 +483,10 @@ const buildShopComponents = (userId, catalog, selectedItemKey) => {
       ...[1, 5, 10].map((quantity) =>
         new ButtonBuilder()
           .setCustomId(`petbuy:${userId}:${selectedItemKey}:${quantity}`)
-          .setLabel(`Mua x${quantity}`)
+          .setLabel(`Buy x${quantity}`)
           .setStyle(ButtonStyle.Success)
       ),
-      button(userId, 'home', 'Quay Lại', '⬅️')
+      button(userId, 'home', 'Back', '⬅️')
     ),
   ];
 };
@@ -584,22 +584,22 @@ const buildPartyComponents = (userId, parties, currentParty) => {
   rows.push(new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId(`petparty:${userId}:create`)
-      .setLabel('Tạo Party')
+      .setLabel('Create Party')
       .setEmoji('➕')
       .setStyle(ButtonStyle.Success)
       .setDisabled(Boolean(currentParty)),
     new ButtonBuilder()
       .setCustomId(`petparty:${userId}:leave`)
-      .setLabel('Rời Party')
+      .setLabel('Leave Party')
       .setEmoji('🚪')
       .setStyle(ButtonStyle.Danger)
       .setDisabled(!currentParty),
     new ButtonBuilder()
       .setCustomId(`petparty:${userId}:refresh`)
-      .setLabel('Làm Mới')
+      .setLabel('Refresh')
       .setEmoji('🔄')
       .setStyle(ButtonStyle.Secondary),
-    button(userId, 'home', 'Quay Lại', '⬅️')
+    button(userId, 'home', 'Back', '⬅️')
   ));
 
   return rows;
@@ -955,3 +955,4 @@ module.exports = {
     parsePartyComponent,
   },
 };
+

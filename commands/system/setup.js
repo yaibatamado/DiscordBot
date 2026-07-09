@@ -143,87 +143,16 @@ const buttonId = (mode, action) => `${SETUP_PREFIX}:${mode}:${action}`;
 const modalId = (mode, userId, action) => `${SETUP_PREFIX}:${mode}:${userId}:${action}Modal`;
 const selectId = (mode, userId, action) => `${SETUP_PREFIX}:${mode}:${userId}:${action}Select`;
 
-const buildPanelComponentsLegacy = (mode) => {
-  const firstRowButtons = [
-    new ButtonBuilder()
-      .setCustomId(buttonId(mode, 'create'))
-      .setLabel(mode === 'voice' ? 'Tạo Voice' : 'Tạo Channel')
-      .setEmoji(mode === 'voice' ? '🎙️' : '#️⃣')
-      .setStyle(ButtonStyle.Success),
-    new ButtonBuilder()
-      .setCustomId(buttonId(mode, 'rename'))
-      .setLabel('Đổi Tên')
-      .setEmoji('🏷️')
-      .setStyle(ButtonStyle.Secondary),
-  ];
-
-  if (mode === 'voice') {
-    firstRowButtons.push(
-      new ButtonBuilder()
-        .setCustomId(buttonId(mode, 'limit'))
-        .setLabel('Giới Hạn')
-        .setEmoji('👥')
-        .setStyle(ButtonStyle.Secondary)
-    );
-  }
-
-  firstRowButtons.push(
-    new ButtonBuilder()
-      .setCustomId(buttonId(mode, 'delete'))
-      .setLabel('Xóa')
-      .setEmoji('🗑️')
-      .setStyle(ButtonStyle.Danger)
-  );
-
-  return [
-    new ActionRowBuilder().addComponents(...firstRowButtons),
-    new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId(buttonId(mode, 'lock'))
-        .setLabel('Khóa')
-        .setEmoji('🔒')
-        .setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder()
-        .setCustomId(buttonId(mode, 'unlock'))
-        .setLabel('Mở')
-        .setEmoji('🔓')
-        .setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder()
-        .setCustomId(buttonId(mode, 'invite'))
-        .setLabel('Mời')
-        .setEmoji('📨')
-        .setStyle(ButtonStyle.Primary),
-      new ButtonBuilder()
-        .setCustomId(buttonId(mode, 'kick'))
-        .setLabel(mode === 'voice' ? 'Kick' : 'Gỡ Quyền')
-        .setEmoji('👢')
-        .setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder()
-        .setCustomId(buttonId(mode, 'block'))
-        .setLabel('Chặn')
-        .setEmoji('⛔')
-        .setStyle(ButtonStyle.Danger)
-    ),
-    new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId(buttonId(mode, 'transfer'))
-        .setLabel('Chuyển Chủ')
-        .setEmoji('👑')
-        .setStyle(ButtonStyle.Secondary)
-    ),
-  ];
-};
-
 const buildPanelComponents = (mode) => {
   const firstRowButtons = [
     new ButtonBuilder()
       .setCustomId(buttonId(mode, 'create'))
-      .setLabel(mode === 'voice' ? 'Tao Voice' : 'Tao Channel')
+      .setLabel(mode === 'voice' ? 'Create Voice' : 'Create Channel')
       .setEmoji(mode === 'voice' ? '🎙️' : '#️⃣')
       .setStyle(ButtonStyle.Success),
     new ButtonBuilder()
       .setCustomId(buttonId(mode, 'rename'))
-      .setLabel('Doi Ten')
+      .setLabel('Rename')
       .setEmoji('🏷️')
       .setStyle(ButtonStyle.Secondary),
   ];
@@ -232,7 +161,7 @@ const buildPanelComponents = (mode) => {
     firstRowButtons.push(
       new ButtonBuilder()
         .setCustomId(buttonId(mode, 'limit'))
-        .setLabel('Gioi Han')
+        .setLabel('Limit')
         .setEmoji('👥')
         .setStyle(ButtonStyle.Secondary)
     );
@@ -241,7 +170,7 @@ const buildPanelComponents = (mode) => {
   firstRowButtons.push(
     new ButtonBuilder()
       .setCustomId(buttonId(mode, 'delete'))
-      .setLabel('Xoa')
+      .setLabel('Delete')
       .setEmoji('🗑️')
       .setStyle(ButtonStyle.Danger)
   );
@@ -261,7 +190,7 @@ const buildPanelComponents = (mode) => {
         .setStyle(ButtonStyle.Secondary),
       new ButtonBuilder()
         .setCustomId(buttonId(mode, 'invite'))
-        .setLabel('Moi')
+        .setLabel('Invite')
         .setEmoji('📨')
         .setStyle(ButtonStyle.Primary),
       new ButtonBuilder()
@@ -278,27 +207,27 @@ const buildPanelComponents = (mode) => {
     new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId(buttonId(mode, 'kick'))
-        .setLabel(mode === 'voice' ? 'Kick' : 'Go Quyen')
+        .setLabel(mode === 'voice' ? 'Kick' : 'Remove')
         .setEmoji('👢')
         .setStyle(ButtonStyle.Secondary),
       new ButtonBuilder()
         .setCustomId(buttonId(mode, 'block'))
-        .setLabel('Chan')
+        .setLabel('Block')
         .setEmoji('⛔')
         .setStyle(ButtonStyle.Danger),
       new ButtonBuilder()
         .setCustomId(buttonId(mode, 'hide'))
-        .setLabel('An')
+        .setLabel('Hide')
         .setEmoji('🙈')
         .setStyle(ButtonStyle.Secondary),
       new ButtonBuilder()
         .setCustomId(buttonId(mode, 'show'))
-        .setLabel('Hien')
+        .setLabel('Show')
         .setEmoji('👁️')
         .setStyle(ButtonStyle.Secondary),
       new ButtonBuilder()
         .setCustomId(buttonId(mode, 'transfer'))
-        .setLabel('Chuyen Chu')
+        .setLabel('Transfer')
         .setEmoji('👑')
         .setStyle(ButtonStyle.Secondary)
     ),
@@ -327,7 +256,7 @@ const buildLimitModal = (userId) => (
       new ActionRowBuilder().addComponents(
         new TextInputBuilder()
           .setCustomId('limit')
-          .setLabel('Số người tối đa')
+          .setLabel('User limit')
           .setPlaceholder('Nhập 0 để bỏ giới hạn, hoặc 1-99')
           .setRequired(true)
           .setStyle(TextInputStyle.Short)
@@ -345,7 +274,7 @@ const buildRenameModal = (mode, userId) => (
       new ActionRowBuilder().addComponents(
         new TextInputBuilder()
           .setCustomId('name')
-          .setLabel('Tên mới')
+          .setLabel('New name')
           .setPlaceholder(mode === 'voice' ? 'Ví dụ: Phòng của Yaiba' : 'Ví dụ: yaiba-room')
           .setRequired(true)
           .setStyle(TextInputStyle.Short)
