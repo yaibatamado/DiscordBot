@@ -1,5 +1,4 @@
 const defaultSql = require('mssql');
-const windowsSql = require('mssql/msnodesqlv8');
 
 let poolPromise;
 let activeSql;
@@ -65,6 +64,9 @@ const getConfig = () => {
 const getPool = () => {
   if (!poolPromise) {
     const config = getConfig();
+    const windowsSql = config.driver === 'msnodesqlv8'
+      ? require('mssql/msnodesqlv8')
+      : null;
     activeSql = config.driver === 'msnodesqlv8' ? windowsSql : defaultSql;
     poolPromise = activeSql.connect(config);
   }
