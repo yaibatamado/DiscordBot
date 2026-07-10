@@ -7,7 +7,7 @@ test('ui embed helper applies shared bot styling', () => {
   const embed = createEmbed({
     title: 'Tiêu đề',
     description: 'Nội dung',
-    variant: 'pet',
+    variant: 'system',
   });
 
   assert.equal(embed.data.title, 'Tiêu đề');

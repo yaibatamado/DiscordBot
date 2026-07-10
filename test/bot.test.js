@@ -42,7 +42,6 @@ test('slash loader registers the public slash command set', () => {
     'mod',
     'moonlight',
     'music',
-    'pet',
     'server',
     'setup',
     'warn',
@@ -70,15 +69,17 @@ test('prefix help replies with a command list embed', () => {
 
   assert.equal(embed.data.title, 'Moonlight Help!');
   assert.match(fieldNames, /System/);
-  assert.match(fieldNames, /Pet/);
   assert.match(fieldNames, /Music/);
   assert.match(fieldNames, /Moderation/);
+  assert.match(fieldNames, /Setup/);
   assert.match(fieldValues, /\?help/);
   assert.match(fieldValues, /\/help/);
   assert.match(fieldValues, /\/moonlight/);
   assert.match(fieldValues, /\?server/);
   assert.match(fieldValues, /\/music/);
+  assert.match(fieldValues, /\/setup voice/);
   assert.match(fieldValues, /\/mod kick/);
+  assert.doesNotMatch(fieldValues, /\/pet/);
   assert.doesNotMatch(fieldValues, /\?baucua/);
   assert.doesNotMatch(fieldValues, /\?nhac/);
 });
@@ -103,8 +104,8 @@ test('slash help replies with a command list embed', async () => {
 
   assert.equal(embed.data.author.name, 'SlashTester');
   assert.match(fieldValues, /\/music/);
-  assert.match(fieldValues, /\/pet/);
   assert.match(fieldValues, /\/moonlight/);
+  assert.doesNotMatch(fieldValues, /\/pet/);
 });
 
 test('moderation kick fetches the target member before acting', async () => {

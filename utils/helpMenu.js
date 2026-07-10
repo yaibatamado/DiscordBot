@@ -15,12 +15,6 @@ const sections = [
     ],
   },
   {
-    name: 'Pet',
-    commands: [
-      ['/pet', 'Mở giao diện pet chính để xem pet, túi đồ, daily, shop và phiêu lưu'],
-    ],
-  },
-  {
     name: 'Music',
     commands: [
       ['/music', 'Xem hướng dẫn dùng Jookie Music'],
@@ -41,6 +35,13 @@ const sections = [
       ['/mod timeout <user> <time> [reason]', 'Timeout thành viên theo số phút kèm lý do'],
       ['/mod untimeout <user>', 'Gỡ timeout cho thành viên'],
       ['/warn <user> <reason>', 'Cảnh cáo tạm thời, không lưu database'],
+    ],
+  },
+  {
+    name: 'Setup',
+    commands: [
+      ['/setup voice', 'Gửi panel quản lý phòng voice riêng'],
+      ['/setup channel', 'Gửi panel tạo kênh text riêng'],
     ],
   },
 ];

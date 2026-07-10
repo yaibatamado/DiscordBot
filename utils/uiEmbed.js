@@ -3,7 +3,6 @@ const { COLOR } = require('../config');
 
 const colors = {
   default: COLOR,
-  pet: 0xf7c948,
   success: 0x57f287,
   warning: 0xfee75c,
   error: 0xed4245,
@@ -14,8 +13,6 @@ const colors = {
 const moonlightImage = 'https://raw.githubusercontent.com/yaibatamado/DiscordBot/main/assets/moonlight.jpg';
 
 const icons = {
-  petEgg: moonlightImage,
-  pet: moonlightImage,
   system: moonlightImage,
   warning: moonlightImage,
 };

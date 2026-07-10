@@ -131,18 +131,6 @@ module.exports = (client) => {
     }
     // ===== DROPDOWN =====
     if (interaction.isStringSelectMenu()) {
-      if (
-        interaction.customId.startsWith('petshop:') ||
-        interaction.customId.startsWith('petadventure:') ||
-        interaction.customId.startsWith('petpartyjoin:')
-      ) {
-        const petCommand = client.slashCommands.get('pet');
-        if (petCommand?.handleComponent) {
-          await petCommand.handleComponent(interaction);
-          return;
-        }
-      }
-
       const msgId = interaction.message.id;
 
       if (!history.has(msgId)) history.set(msgId, []);
@@ -196,18 +184,6 @@ module.exports = (client) => {
 
     // ===== BACK =====
     if (interaction.isButton()) {
-      if (
-        interaction.customId.startsWith('pet:') ||
-        interaction.customId.startsWith('petbuy:') ||
-        interaction.customId.startsWith('petparty:')
-      ) {
-        const petCommand = client.slashCommands.get('pet');
-        if (petCommand?.handleComponent) {
-          await petCommand.handleComponent(interaction);
-          return;
-        }
-      }
-
       if (interaction.customId.startsWith('setup:')) {
         const setupCommand = client.slashCommands.get('setup');
         if (setupCommand?.handleComponent) {
