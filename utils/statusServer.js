@@ -106,7 +106,7 @@ const publishStatusFile = async (filePath, options = {}) => {
 };
 
 const startStatusFileWriter = (client, options = {}) => {
-  const enabled = process.env.STATUS_FILE_ENABLED !== 'false';
+  const enabled = process.env.STATUS_FILE_ENABLED === 'true';
   if (!enabled) return null;
 
   const intervalMs = Number(options.intervalMs || process.env.STATUS_FILE_INTERVAL_MS || 60000);
