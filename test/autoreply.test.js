@@ -17,6 +17,7 @@ test('/autoreply exposes management subcommands', () => {
     'edit',
     'remove',
     'toggle',
+    'mode',
     'channel',
   ]);
 });
@@ -33,6 +34,20 @@ test('autoreply matching supports exact, starts_with, and contains priority', ()
   assert.equal(findMatchingAutoReply('hello moonlight', rules).reply, 'starts');
   assert.equal(findMatchingAutoReply('good moon', rules).reply, 'contains');
   assert.equal(findMatchingAutoReply('sunlight', rules), null);
+});
+
+test('autoreply contains mode avoids tiny and embedded triggers', () => {
+  const { findMatchingAutoReply } = freshRequire('../services/autoReplyService');
+  const rules = [
+    { id: 1, trigger: 't', reply: 'too-short', matchMode: 'contains' },
+    { id: 2, trigger: 'hi', reply: 'embedded', matchMode: 'contains' },
+    { id: 3, trigger: 'moe', reply: 'token', matchMode: 'contains' },
+  ];
+
+  assert.equal(findMatchingAutoReply('t trét mắm tôm', rules), null);
+  assert.equal(findMatchingAutoReply('this is fine', rules), null);
+  assert.equal(findMatchingAutoReply('hello moe', rules).reply, 'token');
+  assert.equal(findMatchingAutoReply('moe cái dái', rules).reply, 'token');
 });
 
 test('autoreply renders simple placeholders', () => {

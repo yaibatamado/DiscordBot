@@ -8,8 +8,8 @@ const autoReplyRepository = require('../../repositories/autoReplyRepository');
 const { clearAutoReplyCache } = require('../../services/autoReplyService');
 
 const matchModeChoices = [
-  { name: 'Contains', value: 'contains' },
   { name: 'Exact', value: 'exact' },
+  { name: 'Contains', value: 'contains' },
   { name: 'Starts With', value: 'starts_with' },
 ];
 
@@ -42,7 +42,7 @@ const execute = async (interaction) => {
   if (subcommand === 'add') {
     const trigger = interaction.options.getString('trigger', true);
     const response = interaction.options.getString('reply', true);
-    const matchMode = interaction.options.getString('mode') || 'contains';
+    const matchMode = interaction.options.getString('mode') || 'exact';
     const channel = interaction.options.getChannel('channel');
 
     try {
@@ -66,6 +66,8 @@ const execute = async (interaction) => {
         title: 'Could Not Create Autoreply',
         description: error.code === 'DUPLICATE_AUTOREPLY'
           ? 'This trigger already exists in this server. Use `/autoreply edit` instead.'
+          : error.code === 'AUTOREPLY_TRIGGER_TOO_SHORT'
+            ? 'Trigger này quá ngắn cho mode đã chọn. Dùng `Exact` cho trigger ngắn, hoặc đặt trigger dài hơn khi dùng `Contains` / `Starts With`.'
           : error.message,
         variant: 'error',
       });
@@ -172,6 +174,36 @@ const execute = async (interaction) => {
       });
   }
 
+  if (subcommand === 'mode') {
+    const trigger = interaction.options.getString('trigger', true);
+    const matchMode = interaction.options.getString('mode', true);
+
+    try {
+      const rule = await autoReplyRepository.setMatchMode({ guildId, trigger, matchMode });
+      clearAutoReplyCache(guildId);
+
+      return reply(interaction, rule
+        ? {
+          title: 'Autoreply Mode Updated',
+          description: `Trigger \`${rule.trigger}\` is now using \`${rule.matchMode}\`.`,
+          fields: [{ name: 'Rule', value: formatRule(rule) }],
+        }
+        : {
+          title: 'Autoreply Not Found',
+          description: 'No autoreply with that trigger exists in this server.',
+          variant: 'warning',
+        });
+    } catch (error) {
+      return reply(interaction, {
+        title: 'Could Not Update Autoreply Mode',
+        description: error.code === 'AUTOREPLY_TRIGGER_TOO_SHORT'
+          ? 'Trigger này quá ngắn cho mode đã chọn. Dùng `Exact` cho trigger ngắn, hoặc đặt trigger dài hơn khi dùng `Contains` / `Starts With`.'
+          : error.message,
+        variant: 'error',
+      });
+    }
+  }
+
   return reply(interaction, {
     title: 'Unknown Subcommand',
     description: 'That autoreply action is not supported yet.',
@@ -270,6 +302,25 @@ module.exports = {
             .setName('enabled')
             .setDescription('Whether the autoreply is enabled')
             .setRequired(true)
+        )
+    )
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName('mode')
+        .setDescription('Change how an existing autoreply matches messages')
+        .addStringOption((option) =>
+          option
+            .setName('trigger')
+            .setDescription('Existing trigger')
+            .setRequired(true)
+            .setMaxLength(120)
+        )
+        .addStringOption((option) =>
+          option
+            .setName('mode')
+            .setDescription('New match mode')
+            .setRequired(true)
+            .addChoices(...matchModeChoices)
         )
     )
     .addSubcommand((subcommand) =>

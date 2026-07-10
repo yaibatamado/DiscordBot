@@ -1,9 +1,12 @@
 const autoReplyRepository = require('../repositories/autoReplyRepository');
+const {
+  containsToken,
+  hasValidTriggerLength,
+  normalizeAutoReplyText,
+} = require('../utils/autoReplyMatch');
 
 const cache = new Map();
 const defaultCacheMs = 30 * 1000;
-
-const normalize = (value) => String(value || '').trim().toLowerCase();
 
 const clearAutoReplyCache = (guildId) => {
   if (guildId) {
@@ -30,13 +33,14 @@ const getCachedRules = async (guildId, repository = autoReplyRepository, ttlMs =
 };
 
 const matchesRule = (content, rule) => {
-  const text = normalize(content);
-  const trigger = normalize(rule.trigger);
+  const text = normalizeAutoReplyText(content);
+  const trigger = normalizeAutoReplyText(rule.trigger);
   if (!text || !trigger) return false;
 
+  if (!hasValidTriggerLength(trigger, rule.matchMode)) return false;
   if (rule.matchMode === 'exact') return text === trigger;
   if (rule.matchMode === 'starts_with') return text.startsWith(trigger);
-  return text.includes(trigger);
+  return containsToken(text, trigger);
 };
 
 const isRuleAllowedInChannel = (rule, channelId) => !rule.channelId || rule.channelId === channelId;
@@ -97,11 +101,13 @@ module.exports = {
   findMatchingAutoReply,
   getReplyOptions,
   handleAutoReply,
+  hasValidTriggerLength,
   isRuleAllowedInChannel,
   matchesRule,
   pickReplyTemplate,
   renderReply,
   _private: {
     getCachedRules,
+    normalize: normalizeAutoReplyText,
   },
 };

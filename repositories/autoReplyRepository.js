@@ -1,4 +1,5 @@
 const db = require('../utils/db');
+const { hasValidTriggerLength } = require('../utils/autoReplyMatch');
 
 const validMatchModes = new Set(['contains', 'exact', 'starts_with']);
 
@@ -58,9 +59,14 @@ const createAutoReplyRepository = (database = db) => {
     tableReady = true;
   };
 
-  const add = async ({ guildId, trigger, reply, matchMode = 'contains', channelId = null, createdBy }) => {
+  const add = async ({ guildId, trigger, reply, matchMode = 'exact', channelId = null, createdBy }) => {
     const cleanTrigger = normalizeTrigger(trigger);
     if (!validMatchModes.has(matchMode)) throw new Error('Invalid autoreply match mode');
+    if (!hasValidTriggerLength(cleanTrigger, matchMode)) {
+      const error = new Error('Trigger is too short for this match mode');
+      error.code = 'AUTOREPLY_TRIGGER_TOO_SHORT';
+      throw error;
+    }
 
     await ensureTable();
     const pool = await database.getPool();
@@ -181,6 +187,31 @@ const createAutoReplyRepository = (database = db) => {
     return mapRow(result.recordset[0]);
   };
 
+  const setMatchMode = async ({ guildId, trigger, matchMode }) => {
+    const cleanTrigger = normalizeTrigger(trigger);
+    if (!validMatchModes.has(matchMode)) throw new Error('Invalid autoreply match mode');
+    if (!hasValidTriggerLength(cleanTrigger, matchMode)) {
+      const error = new Error('Trigger is too short for this match mode');
+      error.code = 'AUTOREPLY_TRIGGER_TOO_SHORT';
+      throw error;
+    }
+
+    await ensureTable();
+    const pool = await database.getPool();
+    const result = await pool.request()
+      .input('guildId', guildId)
+      .input('trigger', cleanTrigger)
+      .input('matchMode', matchMode)
+      .query(`
+        UPDATE dbo.GuildAutoReplies
+        SET match_mode = @matchMode, updated_at = SYSUTCDATETIME()
+        OUTPUT INSERTED.*
+        WHERE guild_id = @guildId AND LOWER(trigger_text) = LOWER(@trigger)
+      `);
+
+    return mapRow(result.recordset[0]);
+  };
+
   const getActive = async (guildId) => list(guildId, { includeDisabled: false });
 
   return {
@@ -190,6 +221,7 @@ const createAutoReplyRepository = (database = db) => {
     remove,
     setChannel,
     setEnabled,
+    setMatchMode,
     updateReply,
     _private: {
       ensureTable,
