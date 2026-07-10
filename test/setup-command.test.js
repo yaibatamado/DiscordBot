@@ -28,6 +28,12 @@ const createMockGuild = () => {
               const current = channel.permissionOverwrites.cache.get(id) || { id };
               channel.permissionOverwrites.cache.set(id, { ...current, ...options });
             },
+            set: async (overwrites) => {
+              channel.permissionOverwrites.cache = new Map(overwrites.map((overwrite) => [
+                overwrite.id,
+                overwrite,
+              ]));
+            },
           },
           delete: async () => {
             const index = channels.indexOf(channel);
@@ -119,6 +125,26 @@ test('setup voice sends an interface embed with public room controls', async () 
   assert.ok(ids.includes('setup:voice:transfer'));
   assert.ok(ids.includes('setup:voice:claim'));
   assert.ok(ids.includes('setup:voice:delete'));
+});
+
+test('setup channel sends an interface embed with reset permissions control', async () => {
+  const setup = require('../commands/system/setup');
+  const replies = [];
+
+  await setup.execute({
+    options: { getSubcommand: () => 'channel' },
+    user: { id: 'user-1' },
+    reply: async (payload) => replies.push(payload),
+  });
+
+  assert.match(replies[0].embeds[0].data.title, /Channel/);
+  const ids = replies[0].components.flatMap((row) =>
+    row.components.map((component) => component.data.custom_id)
+  );
+  assert.ok(ids.includes('setup:channel:create'));
+  assert.ok(ids.includes('setup:channel:rename'));
+  assert.ok(ids.includes('setup:channel:reset'));
+  assert.ok(ids.includes('setup:channel:delete'));
 });
 
 test('setup channel create button creates one private text channel per user', async () => {
@@ -320,6 +346,41 @@ test('setup hide and show update room visibility', async () => {
   });
 
   assert.equal(guild._channels[0].permissionOverwrites.cache.get('guild-1').ViewChannel, true);
+});
+
+test('setup reset removes extra text channel overwrites', async () => {
+  const setup = require('../commands/system/setup');
+  const guild = createMockGuild();
+  const replies = [];
+
+  await setup.handleComponent({
+    customId: 'setup:channel:create',
+    user: { id: 'user-1', username: 'Yaiba' },
+    guild,
+    channel: { parentId: 'category-1' },
+    reply: async (payload) => replies.push(payload),
+  });
+
+  await setup.handleUserSelect({
+    customId: 'setup:channel:user-1:trustSelect',
+    user: { id: 'user-1', username: 'Yaiba' },
+    guild,
+    values: ['user-2'],
+    reply: async (payload) => replies.push(payload),
+  });
+
+  assert.equal(guild._channels[0].permissionOverwrites.cache.has('user-2'), true);
+
+  await setup.handleComponent({
+    customId: 'setup:channel:reset',
+    user: { id: 'user-1', username: 'Yaiba' },
+    guild,
+    reply: async (payload) => replies.push(payload),
+  });
+
+  assert.equal(guild._channels[0].permissionOverwrites.cache.has('user-2'), false);
+  assert.equal(guild._channels[0].permissionOverwrites.cache.has('user-1'), true);
+  assert.equal(guild._channels[0].permissionOverwrites.cache.has('bot-1'), true);
 });
 
 test('setup claim transfers an abandoned voice room to the claimant', async () => {

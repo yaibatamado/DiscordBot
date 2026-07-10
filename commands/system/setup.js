@@ -168,6 +168,15 @@ const buildPanelComponents = (mode) => {
   }
 
   firstRowButtons.push(
+    ...(mode === 'channel'
+      ? [
+        new ButtonBuilder()
+          .setCustomId(buttonId(mode, 'reset'))
+          .setLabel('Reset Permissions')
+          .setEmoji('🔄')
+          .setStyle(ButtonStyle.Secondary),
+      ]
+      : []),
     new ButtonBuilder()
       .setCustomId(buttonId(mode, 'delete'))
       .setLabel('Delete')
@@ -437,6 +446,26 @@ const setRoomVisibility = async (interaction, mode, hidden) => {
 
   await interaction.reply({
     content: hidden ? 'Da an phong rieng cua ban.' : 'Da hien phong rieng cua ban.',
+    flags: MessageFlags.Ephemeral,
+  });
+};
+
+const resetRoomPermissions = async (interaction, mode) => {
+  const channel = await requireOwnedRoom(interaction, mode, 'reset permissions');
+  if (!channel) return;
+
+  const overwrites = baseOverwrites(interaction.guild, interaction.user.id, mode);
+  if (channel.permissionOverwrites?.set) {
+    await channel.permissionOverwrites.set(
+      overwrites,
+      `Moonlight private ${mode} room permissions reset by ${interaction.user.id}`
+    );
+  } else {
+    channel.permissionOverwrites.cache = new Map(overwrites.map((overwrite) => [overwrite.id, overwrite]));
+  }
+
+  await interaction.reply({
+    content: `Da reset permissions cho <#${channel.id}>.`,
     flags: MessageFlags.Ephemeral,
   });
 };
@@ -749,6 +778,11 @@ const handleComponent = async (interaction) => {
     return true;
   }
 
+  if (parsed.action === 'reset' && parsed.mode === 'channel') {
+    await resetRoomPermissions(interaction, parsed.mode);
+    return true;
+  }
+
   if (parsed.action === 'claim' && parsed.mode === 'voice') {
     await claimVoiceRoom(interaction);
     return true;
@@ -896,6 +930,7 @@ module.exports = {
     parseSetupModal,
     parseSetupSelect,
     renameRoom,
+    resetRoomPermissions,
     roomName,
     setRoomPrivacy,
     setRoomVisibility,
