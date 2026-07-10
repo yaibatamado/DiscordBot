@@ -476,7 +476,7 @@
           </div>
         </article>
         <article class="command">
-          <h3><code>/autoreply add trigger:"hi" reply:"hello {user}"</code><br><code>/autoreply list</code><br><code>/autoreply edit/remove/toggle</code></h3>
+          <h3><code>/autoreply add trigger:"hi" reply:"hello {user} || hi {username}" channel:#chat</code><br><code>/autoreply list</code><br><code>/autoreply edit/remove/toggle/channel</code></h3>
           <div>
             <p data-lang="vi">Tạo phản hồi tự động cho server. Khi tin nhắn khớp trigger, Moonlight sẽ trả lời bằng nội dung đã lưu trong SQL Server.</p>
             <p data-lang="en">Creates automatic server replies. When a message matches a trigger, Moonlight responds with the saved SQL Server response.</p>
@@ -485,6 +485,10 @@
               <li data-lang="en">Requires manage server permission.</li>
               <li data-lang="vi">Mode hỗ trợ: contains, exact, starts_with.</li>
               <li data-lang="en">Supported modes: contains, exact, starts_with.</li>
+              <li data-lang="vi">Dùng <code>||</code> để random nhiều câu trả lời.</li>
+              <li data-lang="en">Use <code>||</code> to randomize multiple replies.</li>
+              <li data-lang="vi">Có thể giới hạn autoreply vào một channel bằng option <code>channel</code>.</li>
+              <li data-lang="en">You can limit an autoreply to one channel with the <code>channel</code> option.</li>
               <li data-lang="vi">Placeholder: {user}, {username}, {server}, {channel}.</li>
               <li data-lang="en">Placeholders: {user}, {username}, {server}, {channel}.</li>
             </ul>

@@ -12,6 +12,7 @@ const mapRow = (row) => {
     guildId: row.guild_id,
     trigger: row.trigger_text,
     reply: row.reply_text,
+    channelId: row.channel_id,
     matchMode: row.match_mode,
     enabled: Boolean(row.is_enabled),
     createdBy: row.created_by,
@@ -33,6 +34,7 @@ const createAutoReplyRepository = (database = db) => {
         CREATE TABLE dbo.GuildAutoReplies (
           id INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
           guild_id NVARCHAR(32) NOT NULL,
+          channel_id NVARCHAR(32) NULL,
           trigger_text NVARCHAR(120) NOT NULL,
           reply_text NVARCHAR(1800) NOT NULL,
           match_mode NVARCHAR(20) NOT NULL CONSTRAINT DF_GuildAutoReplies_match_mode DEFAULT ('contains'),
@@ -45,12 +47,18 @@ const createAutoReplyRepository = (database = db) => {
         CREATE UNIQUE INDEX UX_GuildAutoReplies_guild_trigger
           ON dbo.GuildAutoReplies (guild_id, trigger_text);
       END
+
+      IF COL_LENGTH('dbo.GuildAutoReplies', 'channel_id') IS NULL
+      BEGIN
+        ALTER TABLE dbo.GuildAutoReplies
+          ADD channel_id NVARCHAR(32) NULL;
+      END
     `);
 
     tableReady = true;
   };
 
-  const add = async ({ guildId, trigger, reply, matchMode = 'contains', createdBy }) => {
+  const add = async ({ guildId, trigger, reply, matchMode = 'contains', channelId = null, createdBy }) => {
     const cleanTrigger = normalizeTrigger(trigger);
     if (!validMatchModes.has(matchMode)) throw new Error('Invalid autoreply match mode');
 
@@ -76,11 +84,12 @@ const createAutoReplyRepository = (database = db) => {
       .input('trigger', cleanTrigger)
       .input('reply', reply)
       .input('matchMode', matchMode)
+      .input('channelId', channelId)
       .input('createdBy', createdBy)
       .query(`
-        INSERT INTO dbo.GuildAutoReplies (guild_id, trigger_text, reply_text, match_mode, created_by)
+        INSERT INTO dbo.GuildAutoReplies (guild_id, channel_id, trigger_text, reply_text, match_mode, created_by)
         OUTPUT INSERTED.*
-        VALUES (@guildId, @trigger, @reply, @matchMode, @createdBy)
+        VALUES (@guildId, @channelId, @trigger, @reply, @matchMode, @createdBy)
       `);
 
     return mapRow(result.recordset[0]);
@@ -154,6 +163,24 @@ const createAutoReplyRepository = (database = db) => {
     return mapRow(result.recordset[0]);
   };
 
+  const setChannel = async ({ guildId, trigger, channelId = null }) => {
+    const cleanTrigger = normalizeTrigger(trigger);
+    await ensureTable();
+    const pool = await database.getPool();
+    const result = await pool.request()
+      .input('guildId', guildId)
+      .input('trigger', cleanTrigger)
+      .input('channelId', channelId)
+      .query(`
+        UPDATE dbo.GuildAutoReplies
+        SET channel_id = @channelId, updated_at = SYSUTCDATETIME()
+        OUTPUT INSERTED.*
+        WHERE guild_id = @guildId AND LOWER(trigger_text) = LOWER(@trigger)
+      `);
+
+    return mapRow(result.recordset[0]);
+  };
+
   const getActive = async (guildId) => list(guildId, { includeDisabled: false });
 
   return {
@@ -161,6 +188,7 @@ const createAutoReplyRepository = (database = db) => {
     getActive,
     list,
     remove,
+    setChannel,
     setEnabled,
     updateReply,
     _private: {

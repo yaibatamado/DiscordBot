@@ -39,6 +39,8 @@ const matchesRule = (content, rule) => {
   return text.includes(trigger);
 };
 
+const isRuleAllowedInChannel = (rule, channelId) => !rule.channelId || rule.channelId === channelId;
+
 const findMatchingAutoReply = (content, rules) => {
   const sorted = [...rules].sort((a, b) => {
     const priority = { exact: 0, starts_with: 1, contains: 2 };
@@ -46,6 +48,17 @@ const findMatchingAutoReply = (content, rules) => {
   });
 
   return sorted.find((rule) => matchesRule(content, rule)) || null;
+};
+
+const getReplyOptions = (template) => String(template || '')
+  .split('||')
+  .map((reply) => reply.trim())
+  .filter(Boolean);
+
+const pickReplyTemplate = (template, random = Math.random) => {
+  const options = getReplyOptions(template);
+  if (options.length === 0) return '';
+  return options[Math.floor(random() * options.length)] || options[0];
 };
 
 const renderReply = (template, message) => String(template || '')
@@ -59,11 +72,12 @@ const handleAutoReply = async (message, repository = autoReplyRepository) => {
 
   try {
     const rules = await getCachedRules(message.guildId, repository);
-    const rule = findMatchingAutoReply(message.content, rules);
+    const channelRules = rules.filter((rule) => isRuleAllowedInChannel(rule, message.channelId || message.channel?.id));
+    const rule = findMatchingAutoReply(message.content, channelRules);
     if (!rule) return false;
 
     await message.reply({
-      content: renderReply(rule.reply, message),
+      content: renderReply(pickReplyTemplate(rule.reply), message),
       allowedMentions: {
         parse: [],
         users: [message.author.id],
@@ -81,8 +95,11 @@ const handleAutoReply = async (message, repository = autoReplyRepository) => {
 module.exports = {
   clearAutoReplyCache,
   findMatchingAutoReply,
+  getReplyOptions,
   handleAutoReply,
+  isRuleAllowedInChannel,
   matchesRule,
+  pickReplyTemplate,
   renderReply,
   _private: {
     getCachedRules,

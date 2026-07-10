@@ -17,6 +17,7 @@ test('/autoreply exposes management subcommands', () => {
     'edit',
     'remove',
     'toggle',
+    'channel',
   ]);
 });
 
@@ -45,6 +46,21 @@ test('autoreply renders simple placeholders', () => {
   assert.equal(output, 'Hi <@user-1> / Yaiba in Moon Guild at <#channel-1>');
 });
 
+test('autoreply random replies use || separated options', () => {
+  const { getReplyOptions, pickReplyTemplate } = freshRequire('../services/autoReplyService');
+
+  assert.deepEqual(getReplyOptions('Hi || Hello ||  Chao  '), ['Hi', 'Hello', 'Chao']);
+  assert.equal(pickReplyTemplate('Hi || Hello || Chao', () => 0.5), 'Hello');
+});
+
+test('autoreply channel scope filters rules by channel id', () => {
+  const { isRuleAllowedInChannel } = freshRequire('../services/autoReplyService');
+
+  assert.equal(isRuleAllowedInChannel({ channelId: null }, 'channel-1'), true);
+  assert.equal(isRuleAllowedInChannel({ channelId: 'channel-1' }, 'channel-1'), true);
+  assert.equal(isRuleAllowedInChannel({ channelId: 'channel-2' }, 'channel-1'), false);
+});
+
 test('autoreply handler replies to a matching message', async () => {
   const { clearAutoReplyCache, handleAutoReply } = freshRequire('../services/autoReplyService');
   clearAutoReplyCache();
@@ -56,6 +72,7 @@ test('autoreply handler replies to a matching message', async () => {
         trigger: 'hi moon',
         reply: 'Hello {username}',
         matchMode: 'contains',
+        channelId: 'channel-1',
       },
     ],
   };
@@ -66,6 +83,7 @@ test('autoreply handler replies to a matching message', async () => {
     author: { id: 'user-1', username: 'Yaiba', bot: false },
     guild: { name: 'Moon Guild' },
     channel: { id: 'channel-1' },
+    channelId: 'channel-1',
     reply: async (payload) => replies.push(payload),
   }, repository);
 
@@ -76,4 +94,34 @@ test('autoreply handler replies to a matching message', async () => {
     users: ['user-1'],
     roles: [],
   });
+});
+
+test('autoreply handler ignores channel-scoped rules in other channels', async () => {
+  const { clearAutoReplyCache, handleAutoReply } = freshRequire('../services/autoReplyService');
+  clearAutoReplyCache();
+  const replies = [];
+  const repository = {
+    getActive: async () => [
+      {
+        id: 1,
+        trigger: 'hi moon',
+        reply: 'Hello',
+        matchMode: 'contains',
+        channelId: 'channel-2',
+      },
+    ],
+  };
+
+  const handled = await handleAutoReply({
+    guildId: 'guild-1',
+    content: 'hi moon',
+    author: { id: 'user-1', username: 'Yaiba', bot: false },
+    guild: { name: 'Moon Guild' },
+    channel: { id: 'channel-1' },
+    channelId: 'channel-1',
+    reply: async (payload) => replies.push(payload),
+  }, repository);
+
+  assert.equal(handled, false);
+  assert.equal(replies.length, 0);
 });

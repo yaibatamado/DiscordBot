@@ -25,6 +25,7 @@ const buildAutoReplyEmbed = ({ title, description, fields = [], variant = 'syste
 const formatRule = (rule) => [
   `Trigger: \`${rule.trigger}\``,
   `Reply: ${rule.reply}`,
+  `Channel: ${rule.channelId ? `<#${rule.channelId}>` : '**All channels**'}`,
   `Mode: \`${rule.matchMode}\``,
   `Status: **${rule.enabled ? 'Enabled' : 'Disabled'}**`,
 ].join('\n');
@@ -42,6 +43,7 @@ const execute = async (interaction) => {
     const trigger = interaction.options.getString('trigger', true);
     const response = interaction.options.getString('reply', true);
     const matchMode = interaction.options.getString('mode') || 'contains';
+    const channel = interaction.options.getChannel('channel');
 
     try {
       const rule = await autoReplyRepository.add({
@@ -49,6 +51,7 @@ const execute = async (interaction) => {
         trigger,
         reply: response,
         matchMode,
+        channelId: channel?.id || null,
         createdBy: interaction.user.id,
       });
       clearAutoReplyCache(guildId);
@@ -99,7 +102,7 @@ const execute = async (interaction) => {
     return reply(interaction, rule
       ? {
         title: 'Autoreply Updated',
-        description: 'The reply text has been updated.',
+        description: 'The reply text has been updated. Use `||` between replies to let Moonlight pick one randomly.',
         fields: [{ name: 'Rule', value: formatRule(rule) }],
       }
       : {
@@ -144,6 +147,31 @@ const execute = async (interaction) => {
       });
   }
 
+  if (subcommand === 'channel') {
+    const trigger = interaction.options.getString('trigger', true);
+    const channel = interaction.options.getChannel('channel');
+    const rule = await autoReplyRepository.setChannel({
+      guildId,
+      trigger,
+      channelId: channel?.id || null,
+    });
+    clearAutoReplyCache(guildId);
+
+    return reply(interaction, rule
+      ? {
+        title: channel ? 'Autoreply Channel Set' : 'Autoreply Set To All Channels',
+        description: channel
+          ? `Trigger \`${rule.trigger}\` will only reply in ${channel}.`
+          : `Trigger \`${rule.trigger}\` will reply in every channel.`,
+        fields: [{ name: 'Rule', value: formatRule(rule) }],
+      }
+      : {
+        title: 'Autoreply Not Found',
+        description: 'No autoreply with that trigger exists in this server.',
+        variant: 'warning',
+      });
+  }
+
   return reply(interaction, {
     title: 'Unknown Subcommand',
     description: 'That autoreply action is not supported yet.',
@@ -174,7 +202,7 @@ module.exports = {
         .addStringOption((option) =>
           option
             .setName('reply')
-            .setDescription('Reply text. Supports {user}, {username}, {server}, {channel}')
+            .setDescription('Reply text. Use || for random replies. Supports {user}, {username}, {server}, {channel}')
             .setRequired(true)
             .setMaxLength(1800)
         )
@@ -183,6 +211,11 @@ module.exports = {
             .setName('mode')
             .setDescription('How Moonlight should match the trigger')
             .addChoices(...matchModeChoices)
+        )
+        .addChannelOption((option) =>
+          option
+            .setName('channel')
+            .setDescription('Only reply in this channel. Leave empty for every channel.')
         )
     )
     .addSubcommand((subcommand) =>
@@ -237,6 +270,23 @@ module.exports = {
             .setName('enabled')
             .setDescription('Whether the autoreply is enabled')
             .setRequired(true)
+        )
+    )
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName('channel')
+        .setDescription('Limit an autoreply to one channel, or clear the limit')
+        .addStringOption((option) =>
+          option
+            .setName('trigger')
+            .setDescription('Existing trigger')
+            .setRequired(true)
+            .setMaxLength(120)
+        )
+        .addChannelOption((option) =>
+          option
+            .setName('channel')
+            .setDescription('Target channel. Leave empty to allow every channel.')
         )
     ),
 
