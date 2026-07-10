@@ -10,6 +10,7 @@ const sections = [
       ['/check', 'Kiểm tra quyền cần thiết của bot trong server'],
       ['/settings view', 'Xem thiết lập Moonlight của server'],
       ['/settings voice-log <enabled>', 'Bật hoặc tắt thông báo join/leave voice'],
+      ['/autoreply', 'Tạo phản hồi tự động theo trigger, channel và nhiều câu trả lời random'],
       ['?av [@user]', 'Xem avatar của bạn hoặc người được tag'],
       ['/avatar [user]', 'Xem avatar bằng slash command'],
       ['?server', 'Xem thông tin server hiện tại'],

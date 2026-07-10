@@ -408,7 +408,7 @@
 
     .feature-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 18px;
     }
 
@@ -882,6 +882,7 @@
           <div class="terminal-lines">
             <div><strong>&gt;</strong> /setup voice</div>
             <div><strong>&gt;</strong> /mod clear user:@target time:24h</div>
+            <div><strong>&gt;</strong> /autoreply add trigger:"hi" reply:"hello"</div>
             <div><strong>&gt;</strong> /moonlight</div>
           </div>
         </div>
@@ -951,6 +952,12 @@
           <h3>Moderation</h3>
           <p data-lang="vi">Các lệnh mod cho clear tin nhắn, warn, timeout, ban, kick, slowmode, khóa hoặc mở khóa kênh.</p>
           <p data-lang="en">Moderation commands for message cleanup, warnings, timeout, ban, kick, slowmode, and channel lock/unlock.</p>
+        </article>
+        <article class="pixel-panel">
+          <div class="panel-icon">✦</div>
+          <h3>Auto Replies</h3>
+          <p data-lang="vi">Tạo phản hồi tự động theo trigger, giới hạn theo kênh và random nhiều câu trả lời bằng `/autoreply`.</p>
+          <p data-lang="en">Create trigger-based replies, limit them by channel, and randomize response text with `/autoreply`.</p>
         </article>
       </div>
     </section>
