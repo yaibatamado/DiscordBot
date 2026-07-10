@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="vi" data-language="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090d1b">
+  <meta name="description" content="Moonlight command reference with Vietnamese and English explanations.">
+  <title>Moonlight Commands</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #080b17;
+      --panel: rgba(13, 19, 39, .9);
+      --text: #f8f5ff;
+      --muted: #b9c1e8;
+      --soft: #6f7bb7;
+      --line: rgba(179, 198, 255, .22);
+      --line-strong: rgba(217, 229, 255, .42);
+      --gold: #ffe28a;
+      --blue: #82c7ff;
+      --danger: #ff8d9b;
+      --pixel: 0 0 0 1px rgba(255, 255, 255, .14), 0 16px 50px rgba(0, 0, 0, .35);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: ui-monospace, "Cascadia Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 4%, rgba(92, 133, 255, .24), transparent 28%),
+        radial-gradient(circle at 88% 18%, rgba(255, 226, 138, .13), transparent 28%),
+        linear-gradient(180deg, #0e1633 0%, #080b17 48%, #070914 100%);
+      line-height: 1.65;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      background-image:
+        radial-gradient(circle, rgba(255, 255, 255, .95) 0 1px, transparent 1.8px),
+        radial-gradient(circle, rgba(130, 199, 255, .8) 0 1px, transparent 1.8px);
+      background-position: 18px 24px, 62px 80px;
+      background-size: 96px 96px, 132px 132px;
+      opacity: .22;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background: linear-gradient(rgba(255, 255, 255, .03) 1px, transparent 1px);
+      background-size: 100% 4px;
+      opacity: .32;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    code { color: var(--gold); font: inherit; font-weight: 900; }
+    [data-lang] { display: none; }
+    html[data-language="vi"] [data-lang="vi"],
+    html[data-language="en"] [data-lang="en"] { display: revert; }
+    html[data-language="vi"] span[data-lang="vi"],
+    html[data-language="en"] span[data-lang="en"] { display: inline; }
+
+    .site-frame {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(18px);
+      background: rgba(8, 11, 23, .78);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 78px;
+      gap: 22px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .brand img {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      image-rendering: pixelated;
+      box-shadow: 0 0 24px rgba(130, 199, 255, .28);
+    }
+
+    .nav-links,
+    .nav-actions,
+    .language-toggle {
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-links {
+      gap: 18px;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    .nav-actions { gap: 14px; }
+    .nav-links a:hover { color: var(--gold); }
+
+    .language-toggle {
+      gap: 6px;
+      padding: 5px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .06);
+    }
+
+    .language-toggle button {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      border: 0;
+      border-radius: 999px;
+      padding: 7px 10px;
+      color: var(--muted);
+      background: transparent;
+      font: inherit;
+      font-size: .82rem;
+      line-height: 1;
+    }
+
+    .language-toggle button[aria-pressed="true"] {
+      color: #111629;
+      background: var(--gold);
+    }
+
+    .flag {
+      position: relative;
+      display: inline-block;
+      width: 22px;
+      height: 15px;
+      flex: 0 0 auto;
+      overflow: hidden;
+      border-radius: 3px;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18);
+    }
+
+    .flag-vn { background: #da251d; }
+    .flag-vn::before {
+      content: "★";
+      position: absolute;
+      inset: -1px 0 0;
+      color: #ffeb3b;
+      font-size: 10px;
+      line-height: 15px;
+      text-align: center;
+    }
+
+    .flag-us {
+      background: repeating-linear-gradient(to bottom, #b22234 0 1.15px, #fff 1.15px 2.3px);
+    }
+
+    .flag-us::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 10px;
+      height: 8px;
+      background: #3c3b6e;
+    }
+
+    .pixel-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 20px;
+      color: #111629;
+      background: var(--gold);
+      border: 0;
+      font: inherit;
+      font-weight: 900;
+      box-shadow:
+        inset 0 0 0 2px rgba(255, 255, 255, .55),
+        5px 5px 0 #5d45a8,
+        0 18px 36px rgba(255, 226, 138, .18);
+      clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px);
+    }
+
+    .pixel-button.secondary {
+      color: var(--text);
+      background: rgba(18, 27, 58, .9);
+      border: 1px solid var(--line-strong);
+      box-shadow: 5px 5px 0 rgba(130, 199, 255, .22);
+    }
+
+    .hero {
+      padding: 78px 0 42px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr minmax(240px, 340px);
+      gap: 34px;
+      align-items: center;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(3rem, 8vw, 6.6rem);
+      line-height: .9;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+      text-shadow: 0 8px 0 rgba(86, 68, 160, .36), 0 0 38px rgba(130, 199, 255, .18);
+    }
+
+    .hero p {
+      max-width: 760px;
+      margin: 28px 0 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.2rem);
+    }
+
+    .moon-card {
+      position: relative;
+      padding: 22px;
+      background:
+        linear-gradient(180deg, rgba(19, 31, 70, .92), rgba(9, 14, 31, .92)),
+        radial-gradient(circle at 50% 15%, rgba(130, 199, 255, .22), transparent 50%);
+      border: 1px solid var(--line-strong);
+      box-shadow: var(--pixel);
+      clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);
+    }
+
+    .moon-card img {
+      width: 100%;
+      border: 1px solid var(--line);
+      image-rendering: pixelated;
+    }
+
+    .quick-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 36px 0 0;
+    }
+
+    .quick-nav a {
+      padding: 10px 14px;
+      color: var(--muted);
+      background: rgba(18, 27, 58, .72);
+      border: 1px solid var(--line);
+    }
+
+    .quick-nav a:hover {
+      color: var(--gold);
+      border-color: var(--line-strong);
+    }
+
+    section {
+      padding: 38px 0;
+    }
+
+    .category {
+      margin-top: 26px;
+      padding: 26px;
+      background:
+        linear-gradient(180deg, rgba(19, 31, 70, .92), rgba(9, 14, 31, .92)),
+        radial-gradient(circle at 20% 12%, rgba(130, 199, 255, .16), transparent 28%);
+      border: 1px solid var(--line);
+      box-shadow: var(--pixel);
+      clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);
+    }
+
+    .category h2 {
+      margin: 0 0 18px;
+      color: var(--gold);
+      font-size: clamp(1.45rem, 4vw, 2.3rem);
+      text-transform: uppercase;
+    }
+
+    .command-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .command {
+      display: grid;
+      grid-template-columns: minmax(180px, 290px) 1fr;
+      gap: 18px;
+      padding: 18px;
+      background: rgba(8, 12, 28, .68);
+      border: 1px solid var(--line);
+    }
+
+    .command h3 {
+      margin: 0;
+      color: var(--gold);
+      font-size: 1rem;
+      line-height: 1.45;
+    }
+
+    .command p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .command ul {
+      margin: 10px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+    }
+
+    .note {
+      margin-top: 18px;
+      padding: 16px;
+      color: var(--muted);
+      border: 1px solid rgba(255, 226, 138, .28);
+      background: rgba(255, 226, 138, .08);
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 36px 0 46px;
+      color: var(--soft);
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      color: var(--muted);
+    }
+
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+      .hero-grid,
+      .command,
+      .footer-grid { grid-template-columns: 1fr; }
+      .moon-card { max-width: 360px; }
+    }
+
+    @media (max-width: 640px) {
+      .nav { flex-wrap: wrap; padding: 18px 0; min-height: auto; }
+      .nav-actions { width: 100%; justify-content: space-between; }
+      .pixel-button { min-height: 44px; padding: 0 14px; }
+      .category { padding: 20px; }
+      .command { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <nav class="site-frame nav" aria-label="Main navigation">
+      <a class="brand" href="index.html" aria-label="Moonlight home">
+        <img src="assets/blue-pixel-icon.jpg" alt="">
+        <span>Moonlight</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html#features"><span data-lang="vi">Tính năng</span><span data-lang="en">Features</span></a>
+        <a href="commands.html"><span data-lang="vi">Lệnh</span><span data-lang="en">Commands</span></a>
+        <a href="https://discord.gg/6CxEZQu4Rb"><span data-lang="vi">Hỗ trợ</span><span data-lang="en">Support</span></a>
+        <a href="terms.html"><span data-lang="vi">Điều khoản</span><span data-lang="en">Terms</span></a>
+        <a href="privacy.html"><span data-lang="vi">Bảo mật</span><span data-lang="en">Privacy</span></a>
+      </div>
+      <div class="nav-actions">
+        <div class="language-toggle" aria-label="Language">
+          <button type="button" data-set-language="vi" aria-pressed="true" title="Tiếng Việt"><span class="flag flag-vn" aria-hidden="true"></span>VI</button>
+          <button type="button" data-set-language="en" aria-pressed="false" title="English"><span class="flag flag-us" aria-hidden="true"></span>EN</button>
+        </div>
+        <a class="pixel-button" href="https://discord.com/oauth2/authorize?client_id=1485928452283699230&permissions=8&scope=bot%20applications.commands">
+          <span data-lang="vi">Mời bot</span>
+          <span data-lang="en">Invite</span>
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="site-frame hero">
+      <div class="hero-grid">
+        <div>
+          <h1>Commands</h1>
+          <p data-lang="vi">Danh sách lệnh chính thức của Moonlight, kèm cách dùng, quyền cần có và ghi chú để bạn quản lý server dễ hơn.</p>
+          <p data-lang="en">The official Moonlight command reference, with usage, required permissions, and notes for smoother server management.</p>
+          <div class="quick-nav" aria-label="Command categories">
+            <a href="#system"><span data-lang="vi">Hệ thống</span><span data-lang="en">System</span></a>
+            <a href="#voice"><span data-lang="vi">Voice & nhạc</span><span data-lang="en">Voice & Music</span></a>
+            <a href="#moderation"><span data-lang="vi">Quản trị</span><span data-lang="en">Moderation</span></a>
+            <a href="#setup"><span data-lang="vi">Thiết lập</span><span data-lang="en">Setup</span></a>
+          </div>
+        </div>
+        <div class="moon-card" aria-hidden="true">
+          <img src="assets/blue-pixel-icon.jpg" alt="">
+        </div>
+      </div>
+    </section>
+
+    <section id="system" class="site-frame category">
+      <h2><span data-lang="vi">Hệ thống</span><span data-lang="en">System</span></h2>
+      <div class="command-list">
+        <article class="command">
+          <h3><code>/help</code><br><code>?help</code></h3>
+          <div>
+            <p data-lang="vi">Mở bảng hướng dẫn nhanh trong Discord. Dùng khi bạn muốn xem toàn bộ nhóm lệnh hiện có mà không cần lên website.</p>
+            <p data-lang="en">Shows the quick help panel inside Discord. Use it when you want the available command groups without opening the website.</p>
+          </div>
+        </article>
+        <article class="command">
+          <h3><code>/moonlight</code></h3>
+          <div>
+            <p data-lang="vi">Hiển thị thông tin bot, số server, uptime, các lệnh chính và nút mời bot hoặc vào server hỗ trợ.</p>
+            <p data-lang="en">Shows bot information, server count, uptime, main commands, and buttons for inviting the bot or joining support.</p>
+          </div>
+        </article>
+        <article class="command">
+          <h3><code>/avatar [user]</code><br><code>?av [@user]</code></h3>
+          <div>
+            <p data-lang="vi">Xem avatar của bạn hoặc người được chọn. Nếu không chọn user, bot sẽ lấy avatar của người dùng lệnh.</p>
+            <p data-lang="en">Shows your avatar or the selected user's avatar. If no user is selected, Moonlight uses the command author.</p>
+          </div>
+        </article>
+        <article class="command">
+          <h3><code>/server</code><br><code>?server</code></h3>
+          <div>
+            <p data-lang="vi">Xem thông tin server bằng embed: tên server, chủ server, số thành viên, kênh, role và các dữ liệu tổng quan.</p>
+            <p data-lang="en">Shows server information in an embed: server name, owner, member count, channels, roles, and overview details.</p>
+          </div>
+        </article>
+        <article class="command">
+          <h3><code>/dbstatus</code></h3>
+          <div>
+            <p data-lang="vi">Kiểm tra trạng thái kết nối SQL Server. Hữu ích khi bạn muốn biết bot có đang kết nối database ổn không.</p>
+            <p data-lang="en">Checks SQL Server connection status. Useful for confirming whether the bot can reach the database.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="voice" class="site-frame category">
+      <h2><span data-lang="vi">Voice & nhạc</span><span data-lang="en">Voice & Music</span></h2>
+      <div class="command-list">
+        <article class="command">
+          <h3><code>/join</code></h3>
+          <div>
+            <p data-lang="vi">Cho Moonlight vào kênh voice bạn đang đứng. Dùng để treo bot trong voice hoặc hỗ trợ các thông báo voice.</p>
+            <p data-lang="en">Makes Moonlight join your current voice channel. Use it to keep the bot present in voice or support voice notifications.</p>
+          </div>
+        </article>
+        <article class="command">
+          <h3><code>/leave</code></h3>
+          <div>
+            <p data-lang="vi">Cho Moonlight rời voice channel hiện tại trong server.</p>
+            <p data-lang="en">Makes Moonlight leave the current voice connection in the server.</p>
+          </div>
+        </article>
+        <article class="command">
+          <h3><code>/music</code></h3>
+          <div>
+            <p data-lang="vi">Hiển thị hướng dẫn dùng Jookie Music, dành cho server muốn dùng bot nhạc riêng bên cạnh Moonlight.</p>
+            <p data-lang="en">Shows the Jookie Music guide for servers that use a dedicated music bot alongside Moonlight.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="moderation" class="site-frame category">
+      <h2><span data-lang="vi">Quản trị</span><span data-lang="en">Moderation</span></h2>
+      <div class="command-list">
+        <article class="command">
+          <h3><code>/mod clear [amount] [user] [userid] [time]</code></h3>
+          <div>
+            <p data-lang="vi">Xóa tin nhắn trong kênh hiện tại. Có thể lọc theo user, user ID và mốc thời gian như 1 giờ, 6 giờ, 12 giờ, 24 giờ, 3 ngày hoặc 7 ngày.</p>
+            <p data-lang="en">Deletes messages in the current channel. You can filter by user, user ID, and time range such as 1 hour, 6 hours, 12 hours, 24 hours, 3 days, or 7 days.</p>
+            <ul>
+              <li data-lang="vi">Cần quyền quản lý tin nhắn.</li>
+              <li data-lang="en">Requires manage messages permission.</li>
+              <li data-lang="vi">Discord không cho bulk delete tin nhắn quá 14 ngày, nên bot sẽ xóa tối đa phần có thể xóa.</li>
+              <li data-lang="en">Discord does not allow bulk deleting messages older than 14 days, so the bot removes the maximum deletable set.</li>
+            </ul>
+          </div>
+        </article>
+        <article class="command">
+          <h3><code>/mod kick user:@user</code></h3>
+          <div>
+            <p data-lang="vi">Kick một thành viên khỏi server. Thành viên có thể vào lại nếu có link mời hợp lệ.</p>
+            <p data-lang="en">Kicks a member from the server. The member can rejoin later with a valid invite link.</p>
+          </div>
+        </article>
+        <article class="command">
+          <h3><code>/mod ban user:@user</code><br><code>/mod unban userid:id</code></h3>
+          <div>
+            <p data-lang="vi">Ban hoặc gỡ ban thành viên. Lệnh unban dùng user ID, phù hợp khi user không còn trong server.</p>
+            <p data-lang="en">Bans or unbans a member. The unban command uses a user ID, which works even when the user is no longer in the server.</p>
+          </div>
+        </article>
+        <article class="command">
+          <h3><code>/mod timeout user:@user time:10 reason:"spam"</code><br><code>/mod untimeout user:@user</code></h3>
+          <div>
+            <p data-lang="vi">Timeout hoặc gỡ timeout thành viên. Có thể thêm lý do để embed kết quả rõ ràng hơn.</p>
+            <p data-lang="en">Timeouts or removes timeout from a member. You can include a reason for a clearer result embed.</p>
+          </div>
+        </article>
+        <article class="command">
+          <h3><code>/warn user:@user reason:"spam"</code></h3>
+          <div>
+            <p data-lang="vi">Gửi cảnh cáo tạm thời cho user. Lệnh này không lưu lịch sử vào database.</p>
+            <p data-lang="en">Sends a temporary warning to a user. This command does not store warning history in the database.</p>
+          </div>
+        </article>
+        <article class="command">
+          <h3><code>/mod slowmode seconds:10</code></h3>
+          <div>
+            <p data-lang="vi">Đặt slowmode cho kênh hiện tại, giúp giảm spam khi chat quá nhanh.</p>
+            <p data-lang="en">Sets slowmode for the current channel to reduce rapid spam.</p>
+          </div>
+        </article>
+        <article class="command">
+          <h3><code>/mod lockchannel</code><br><code>/mod unlockchannel</code></h3>
+          <div>
+            <p data-lang="vi">Khóa hoặc mở khóa quyền gửi tin nhắn của @everyone trong kênh hiện tại.</p>
+            <p data-lang="en">Locks or unlocks @everyone's send-message permission in the current channel.</p>
+          </div>
+        </article>
+      </div>
+      <div class="note">
+        <span data-lang="vi">Ghi chú: các lệnh quản trị cần bot có quyền phù hợp và role của bot phải cao hơn role của mục tiêu.</span>
+        <span data-lang="en">Note: moderation commands require the bot to have the correct permissions, and the bot role must be higher than the target role.</span>
+      </div>
+    </section>
+
+    <section id="setup" class="site-frame category">
+      <h2><span data-lang="vi">Thiết lập</span><span data-lang="en">Setup</span></h2>
+      <div class="command-list">
+        <article class="command">
+          <h3><code>/setup voice</code></h3>
+          <div>
+            <p data-lang="vi">Gửi panel quản lý phòng voice riêng vào kênh hiện tại. Người dùng bấm nút để tạo voice riêng và quản lý phòng bằng các nút tiếng Anh.</p>
+            <p data-lang="en">Sends the private voice room control panel to the current channel. Users press buttons to create and manage their own voice room.</p>
+            <ul>
+              <li data-lang="vi">Các thao tác chính: Name, Limit, Privacy, Invite, Kick, Claim, Transfer, Delete.</li>
+              <li data-lang="en">Main actions: Name, Limit, Privacy, Invite, Kick, Claim, Transfer, Delete.</li>
+              <li data-lang="vi">Bot cũng báo join/leave ngay trong chat của kênh voice.</li>
+              <li data-lang="en">The bot also announces join/leave activity inside the voice channel chat.</li>
+            </ul>
+          </div>
+        </article>
+        <article class="command">
+          <h3><code>/setup channel</code></h3>
+          <div>
+            <p data-lang="vi">Gửi panel tạo text channel cá nhân. Mỗi thành viên có thể tạo phòng riêng để chat, gửi ảnh hoặc lưu tài liệu.</p>
+            <p data-lang="en">Sends the private text channel panel. Each member can create a personal room for chatting, images, or saved notes.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="site-frame footer-grid">
+      <div>
+        <span data-lang="vi">© 2026 Moonlight Bot. Danh sách lệnh được cập nhật theo bản bot hiện tại.</span>
+        <span data-lang="en">© 2026 Moonlight Bot. Command reference updated for the current bot version.</span>
+      </div>
+      <div class="footer-links">
+        <a href="index.html"><span data-lang="vi">Trang chủ</span><span data-lang="en">Home</span></a>
+        <a href="terms.html"><span data-lang="vi">Điều khoản</span><span data-lang="en">Terms</span></a>
+        <a href="privacy.html"><span data-lang="vi">Bảo mật</span><span data-lang="en">Privacy</span></a>
+        <a href="https://discord.gg/6CxEZQu4Rb"><span data-lang="vi">Hỗ trợ</span><span data-lang="en">Support</span></a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const applyLanguage = (language) => {
+      const nextLanguage = language === 'en' ? 'en' : 'vi';
+      document.documentElement.dataset.language = nextLanguage;
+      document.documentElement.lang = nextLanguage;
+      localStorage.setItem('moonlight-language', nextLanguage);
+
+      document.querySelectorAll('[data-set-language]').forEach((button) => {
+        button.setAttribute('aria-pressed', String(button.dataset.setLanguage === nextLanguage));
+      });
+    };
+
+    document.querySelectorAll('[data-set-language]').forEach((button) => {
+      button.addEventListener('click', () => applyLanguage(button.dataset.setLanguage));
+    });
+
+    applyLanguage(localStorage.getItem('moonlight-language') || 'vi');
+  </script>
+</body>
+</html>

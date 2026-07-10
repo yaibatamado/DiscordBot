@@ -339,78 +339,25 @@
       place-items: center;
     }
 
-    .hero-art::before {
-      content: "";
-      position: absolute;
-      width: min(78vw, 440px);
-      aspect-ratio: 1;
-      border-radius: 50%;
-      background:
-        radial-gradient(circle at 50% 45%, rgba(130, 199, 255, .22), transparent 58%),
-        radial-gradient(circle at 54% 54%, rgba(255, 226, 138, .12), transparent 48%);
-      filter: blur(2px);
-    }
-
-    .hero-card {
-      position: relative;
-      width: min(82vw, 460px);
-      padding: 14px;
-      background:
-        linear-gradient(180deg, rgba(20, 29, 64, .9), rgba(5, 7, 17, .92)),
-        radial-gradient(circle at 50% 0%, rgba(130, 199, 255, .28), transparent 44%);
-      border: 1px solid var(--line-strong);
-      box-shadow:
-        8px 8px 0 rgba(93, 69, 168, .28),
-        0 34px 90px rgba(0, 0, 0, .42),
-        0 0 70px rgba(130, 199, 255, .14);
-      clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);
-    }
-
-    .hero-card::before,
-    .hero-card::after {
-      content: "";
-      position: absolute;
-      width: 18px;
-      height: 18px;
-      border: solid var(--gold);
-      opacity: .8;
-      pointer-events: none;
-    }
-
-    .hero-card::before {
-      top: 10px;
-      left: 10px;
-      border-width: 2px 0 0 2px;
-    }
-
-    .hero-card::after {
-      right: 10px;
-      bottom: 10px;
-      border-width: 0 2px 2px 0;
-    }
-
-    .hero-spark {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background-image:
-        radial-gradient(circle, rgba(255, 255, 255, .96) 0 2px, transparent 2.4px),
-        radial-gradient(circle, rgba(130, 199, 255, .9) 0 1px, transparent 1.6px);
-      background-position: 18% 16%, 82% 72%;
-      background-size: 90px 90px, 130px 130px;
-      opacity: .42;
-      image-rendering: pixelated;
-    }
-
     .hero-art .cat {
       position: relative;
-      width: 100%;
-      border: 1px solid rgba(217, 229, 255, .24);
-      background: #050612;
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08);
+      width: min(78vw, 430px);
+      border: 1px solid var(--line);
+      box-shadow: 0 28px 90px var(--shadow);
       image-rendering: pixelated;
-      opacity: .96;
+      mix-blend-mode: screen;
+      opacity: .92;
       clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px);
+    }
+
+    .moon-banner {
+      position: absolute;
+      right: 0;
+      bottom: 16px;
+      width: min(72vw, 380px);
+      border: 1px solid var(--line);
+      box-shadow: var(--pixel);
+      image-rendering: pixelated;
     }
 
     section {
@@ -650,9 +597,12 @@
     }
 
     @media (prefers-reduced-motion: no-preference) {
-      .brand img,
-      .hero-card {
+      .brand img {
         animation: floaty 5s ease-in-out infinite;
+      }
+
+      .moon-banner {
+        animation: floaty 6s ease-in-out infinite reverse;
       }
 
       @keyframes floaty {
@@ -671,7 +621,7 @@
       </a>
       <div class="nav-links">
         <a href="#features"><span data-lang="vi">Tính năng</span><span data-lang="en">Features</span></a>
-        <a href="#commands"><span data-lang="vi">Lệnh</span><span data-lang="en">Commands</span></a>
+        <a href="commands.html"><span data-lang="vi">Lệnh</span><span data-lang="en">Commands</span></a>
         <a href="https://discord.gg/6CxEZQu4Rb"><span data-lang="vi">Hỗ trợ</span><span data-lang="en">Support</span></a>
         <a href="#legal"><span data-lang="vi">Pháp lý</span><span data-lang="en">Legal</span></a>
         <a href="terms.html"><span data-lang="vi">Điều khoản</span><span data-lang="en">Terms</span></a>
@@ -701,7 +651,7 @@
             <span data-lang="vi">Mời Moonlight</span>
             <span data-lang="en">Invite Moonlight</span>
           </a>
-          <a class="pixel-button secondary" href="#commands">
+          <a class="pixel-button secondary" href="commands.html">
             <span data-lang="vi">Xem lệnh</span>
             <span data-lang="en">View Commands</span>
           </a>
@@ -724,10 +674,8 @@
       </div>
 
       <div class="hero-art" aria-hidden="true">
-        <div class="hero-card">
-          <span class="hero-spark"></span>
-          <img class="cat" src="assets/cat-pixel-art.jpg" alt="">
-        </div>
+        <img class="cat" src="assets/cat-pixel-art.jpg" alt="">
+        <img class="moon-banner" src="assets/moon-banner.jpg" alt="">
       </div>
     </section>
 
