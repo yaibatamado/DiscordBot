@@ -475,6 +475,21 @@
             <p data-lang="en">Views or updates server settings. Currently used to enable or disable voice join/leave notifications, stored in SQL Server.</p>
           </div>
         </article>
+        <article class="command">
+          <h3><code>/autoreply add trigger:"hi" reply:"hello {user}"</code><br><code>/autoreply list</code><br><code>/autoreply edit/remove/toggle</code></h3>
+          <div>
+            <p data-lang="vi">Tạo phản hồi tự động cho server. Khi tin nhắn khớp trigger, Moonlight sẽ trả lời bằng nội dung đã lưu trong SQL Server.</p>
+            <p data-lang="en">Creates automatic server replies. When a message matches a trigger, Moonlight responds with the saved SQL Server response.</p>
+            <ul>
+              <li data-lang="vi">Cần quyền quản lý server.</li>
+              <li data-lang="en">Requires manage server permission.</li>
+              <li data-lang="vi">Mode hỗ trợ: contains, exact, starts_with.</li>
+              <li data-lang="en">Supported modes: contains, exact, starts_with.</li>
+              <li data-lang="vi">Placeholder: {user}, {username}, {server}, {channel}.</li>
+              <li data-lang="en">Placeholders: {user}, {username}, {server}, {channel}.</li>
+            </ul>
+          </div>
+        </article>
       </div>
     </section>
 

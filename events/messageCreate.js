@@ -2,11 +2,12 @@ const { PREFIX } = require('../config');
 const { commands, aliases } = require('../handlers/commandHandler');
 const logger = require('../utils/logger');
 const triggerHandler = require('../handlers/triggerHandler');
+const { handleAutoReply } = require('../services/autoReplyService');
 
 const cooldowns = new Map();
 
 module.exports = (client) => {
-  client.on('messageCreate', (message) => {
+  client.on('messageCreate', async (message) => {
 
     if (message.author.bot) return;
     
@@ -33,6 +34,9 @@ module.exports = (client) => {
 
     // 🔥 trigger cho tin nhắn thường
     if (!message.content.startsWith(PREFIX)) {
+      const handledAutoReply = await handleAutoReply(message);
+      if (handledAutoReply) return;
+
       triggerHandler(message);
       return;
     }

@@ -34,6 +34,7 @@ test('slash loader registers the public slash command set', () => {
   loadSlash(client);
 
   assert.deepEqual([...client.slashCommands.keys()].sort(), [
+    'autoreply',
     'avatar',
     'check',
     'dbstatus',
