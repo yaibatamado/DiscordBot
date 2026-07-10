@@ -339,6 +339,18 @@
       place-items: center;
     }
 
+    .moon-ring {
+      position: absolute;
+      width: min(86vw, 430px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 50% 48%, rgba(255, 243, 190, .95) 0 30%, rgba(255, 226, 138, .28) 31% 39%, transparent 40%),
+        radial-gradient(circle, rgba(130, 199, 255, .25), transparent 68%);
+      filter: drop-shadow(0 0 50px rgba(255, 226, 138, .28));
+      image-rendering: pixelated;
+    }
+
     .hero-art .cat {
       position: relative;
       width: min(78vw, 430px);
@@ -348,16 +360,6 @@
       mix-blend-mode: screen;
       opacity: .92;
       clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px);
-    }
-
-    .moon-banner {
-      position: absolute;
-      right: 0;
-      bottom: 16px;
-      width: min(72vw, 380px);
-      border: 1px solid var(--line);
-      box-shadow: var(--pixel);
-      image-rendering: pixelated;
     }
 
     section {
@@ -597,12 +599,9 @@
     }
 
     @media (prefers-reduced-motion: no-preference) {
-      .brand img {
+      .brand img,
+      .moon-ring {
         animation: floaty 5s ease-in-out infinite;
-      }
-
-      .moon-banner {
-        animation: floaty 6s ease-in-out infinite reverse;
       }
 
       @keyframes floaty {
@@ -674,8 +673,8 @@
       </div>
 
       <div class="hero-art" aria-hidden="true">
+        <div class="moon-ring"></div>
         <img class="cat" src="assets/cat-pixel-art.jpg" alt="">
-        <img class="moon-banner" src="assets/moon-banner.jpg" alt="">
       </div>
     </section>
 
