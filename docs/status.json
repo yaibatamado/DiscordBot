@@ -3,10 +3,10 @@
   "status": "online",
   "guilds": 3,
   "users": 126,
-  "slashCommands": 13,
+  "slashCommands": 14,
   "version": "1.0.0",
-  "uptimeMs": 1500256,
-  "startedAt": "2026-07-10T10:45:45.684Z",
-  "processStartedAt": "2026-07-10T10:45:43.129Z",
-  "updatedAt": "2026-07-10T11:10:45.940Z"
+  "uptimeMs": 3,
+  "startedAt": "2026-07-10T11:13:22.549Z",
+  "processStartedAt": "2026-07-10T11:13:19.906Z",
+  "updatedAt": "2026-07-10T11:13:22.552Z"
 }
