@@ -55,7 +55,6 @@ const buildMoonlightEmbed = (client) => createEmbed({
     { name: 'Uptime', value: formatUptime(client.uptime), inline: true },
     { name: 'Servers', value: String(client.guilds?.cache?.size ?? 0), inline: true },
     { name: 'Main Commands', value: '`/help` `/setup` `/mod` `/server` `/music`', inline: false },
-    { name: 'Support', value: `[Discord Server](${supportServerUrl})`, inline: false },
   ],
   footer: 'Moonlight System',
 });

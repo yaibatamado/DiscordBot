@@ -5,6 +5,7 @@ const fs = require('fs');
 
 const { loadCommands } = require('./handlers/commandHandler');
 const loadSlash = require('./handlers/slashLoader');
+const { startStatusFileWriter, startStatusServer } = require('./utils/statusServer');
 
 const client = new Client({
   intents: [
@@ -12,17 +13,15 @@ const client = new Client({
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.GuildVoiceStates,
-    GatewayIntentBits.MessageContent
-  ]
+    GatewayIntentBits.MessageContent,
+  ],
 });
 
 client.slashCommands = new Map();
 
-// 🔥 LOAD COMMAND
 loadCommands();
 loadSlash(client);
 
-// LOAD EVENTS
 const eventFiles = fs.readdirSync('./events');
 
 for (const file of eventFiles) {
@@ -30,13 +29,24 @@ for (const file of eventFiles) {
   event(client);
 }
 
+let statusServer;
+let statusFileWriter;
+
 client.on('clientReady', () => {
   client.user.setPresence({
     activities: [{ name: '/help', type: ActivityType.Playing }],
     status: 'online',
   });
 
-  console.log(`📡 BOT ONLINE: ${client.user.tag}`);
+  if (!statusServer) {
+    statusServer = startStatusServer(client);
+  }
+
+  if (!statusFileWriter) {
+    statusFileWriter = startStatusFileWriter(client);
+  }
+
+  console.log(`BOT ONLINE: ${client.user.tag}`);
 });
 
 client.login(process.env.TOKEN);
