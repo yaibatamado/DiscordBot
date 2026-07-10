@@ -55,8 +55,12 @@ test('weather helper resolves location and current weather', async () => {
           temperature_2m: 31.4,
           apparent_temperature: 35.1,
           relative_humidity_2m: 70,
+          cloud_cover: 40,
+          precipitation: 0,
+          surface_pressure: 1008,
           weather_code: 2,
           wind_speed_10m: 11.2,
+          time: '2026-07-11T16:30',
         },
       }),
     };
@@ -67,6 +71,8 @@ test('weather helper resolves location and current weather', async () => {
 
   assert.equal(requested.length, 2);
   assert.equal(result.place.name, 'Ho Chi Minh City');
-  assert.equal(embed.data.title, 'Weather - Ho Chi Minh City, Ho Chi Minh, Vietnam');
-  assert.match(embed.data.fields.map((field) => field.value).join('\n'), /31°C/);
+  assert.equal(embed.data.title, '⛅ Thời tiết - Ho Chi Minh City');
+  assert.match(embed.data.description, /31°C/);
+  assert.match(embed.data.fields.map((field) => field.value).join('\n'), /Ho Chi Minh City, Ho Chi Minh, Vietnam/);
+  assert.match(embed.data.footer.text, /Open-Meteo/);
 });
