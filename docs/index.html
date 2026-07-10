@@ -413,22 +413,77 @@
     }
 
     .status-grid {
+      position: relative;
       display: grid;
-      grid-template-columns: 1.15fr repeat(2, minmax(0, 1fr));
-      gap: 18px;
+      grid-template-columns: minmax(260px, 1.15fr) minmax(160px, .72fr) minmax(220px, .98fr);
+      gap: 14px;
+      padding-top: 18px;
+      align-items: start;
+    }
+
+    .status-grid::before {
+      content: "";
+      position: absolute;
+      inset: 0 22px auto;
+      height: 1px;
+      background:
+        linear-gradient(90deg, transparent, rgba(130, 199, 255, .5), transparent),
+        repeating-linear-gradient(90deg, transparent 0 42px, rgba(255, 226, 138, .7) 42px 47px, transparent 47px 94px);
+      opacity: .75;
+    }
+
+    .status-grid::after {
+      content: "";
+      position: absolute;
+      top: 7px;
+      right: 44px;
+      width: 5px;
+      height: 5px;
+      background: var(--gold);
+      box-shadow:
+        -54px 15px 0 rgba(130, 199, 255, .7),
+        -118px 2px 0 rgba(255, 255, 255, .72),
+        -188px 18px 0 rgba(130, 199, 255, .38);
+      opacity: .8;
+    }
+
+    #status {
+      position: relative;
+      padding-top: 62px;
+      padding-bottom: 58px;
+    }
+
+    #status .section-head {
+      margin-bottom: 18px;
+    }
+
+    #status h2 {
+      font-size: clamp(2rem, 4.8vw, 3.2rem);
     }
 
     .status-card {
       position: relative;
-      padding: 20px;
-      min-height: 132px;
+      padding: 16px 17px;
+      min-height: 98px;
       background:
-        linear-gradient(180deg, rgba(20, 29, 64, .86), rgba(8, 12, 28, .92)),
-        radial-gradient(circle at 20% 10%, rgba(130, 199, 255, .16), transparent 34%);
+        radial-gradient(circle at 18% 0, rgba(255, 226, 138, .12), transparent 26%),
+        linear-gradient(180deg, rgba(20, 29, 64, .84), rgba(8, 12, 28, .94)),
+        radial-gradient(circle at 86% 18%, rgba(130, 199, 255, .12), transparent 30%);
       border: 1px solid var(--line);
       box-shadow: var(--pixel);
       overflow: hidden;
       clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
+    }
+
+    .status-card::before {
+      content: "";
+      position: absolute;
+      inset: 10px auto auto 10px;
+      width: 24px;
+      height: 3px;
+      background: rgba(130, 199, 255, .6);
+      box-shadow: 34px 0 0 rgba(255, 226, 138, .58), 68px 0 0 rgba(255, 255, 255, .36);
+      opacity: .42;
     }
 
     .status-card::after {
@@ -457,27 +512,41 @@
 
     .status-card strong {
       display: block;
-      margin-top: 8px;
+      margin-top: 7px;
       color: var(--gold);
-      font-size: 1.35rem;
+      font-size: 1.2rem;
+      line-height: 1.25;
     }
 
     .status-card.primary {
-      min-height: 180px;
+      min-height: 112px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      gap: 8px;
       background:
-        radial-gradient(circle at 50% 16%, rgba(255, 226, 138, .16), transparent 34%),
+        radial-gradient(circle at 12% 20%, rgba(255, 226, 138, .18), transparent 26%),
+        radial-gradient(circle at 92% 22%, rgba(130, 199, 255, .14), transparent 30%),
         linear-gradient(180deg, rgba(28, 38, 82, .92), rgba(8, 12, 28, .96));
     }
 
+    .status-main {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr);
+      column-gap: 12px;
+      align-items: center;
+    }
+
+    .status-copy {
+      min-width: 0;
+    }
+
     .status-orb {
-      width: 58px;
-      height: 58px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       background: radial-gradient(circle at 35% 32%, #ffffff, var(--gold) 34%, rgba(130, 199, 255, .45) 64%, rgba(130, 199, 255, .08) 65%);
-      box-shadow: 0 0 42px rgba(255, 226, 138, .28);
+      box-shadow: 0 0 28px rgba(255, 226, 138, .32), 13px 9px 0 rgba(38, 73, 120, .75);
       image-rendering: pixelated;
     }
 
@@ -485,11 +554,12 @@
       display: inline-flex;
       align-items: center;
       gap: 9px;
-      margin-top: 18px;
+      margin-top: 0;
       color: var(--muted);
       font-weight: 900;
       text-transform: uppercase;
       letter-spacing: .08em;
+      font-size: .78rem;
     }
 
     .status-live::before {
@@ -506,15 +576,35 @@
     }
 
     .status-meta {
-      margin-top: 8px;
+      margin-top: 6px;
       color: var(--soft);
-      font-size: .86rem;
+      font-size: .78rem;
+    }
+
+    .status-meta span[data-status-value="uptime"] {
+      display: inline !important;
+      color: inherit;
+      font-size: inherit;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .status-card.primary > .status-meta {
+      width: fit-content;
+      margin-top: 0;
+      padding: 4px 8px;
+      border: 1px solid rgba(130, 199, 255, .2);
+      background: rgba(255, 255, 255, .035);
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
     }
 
     .status-updated {
       color: var(--muted);
-      font-size: 1rem;
-      line-height: 1.5;
+      font-size: .92rem;
+      line-height: 1.45;
+      word-break: break-word;
     }
 
     .pixel-panel {
@@ -811,11 +901,13 @@
       </div>
       <div class="status-grid">
         <div class="status-card primary" data-status-card>
-          <div>
+          <div class="status-main">
             <div class="status-orb"></div>
-            <div class="status-live" data-status-value="status">Connecting</div>
-            <strong data-status-value="bot">Moonlight</strong>
-            <div class="status-meta">Uptime: <span data-status-value="uptime">--</span></div>
+            <div class="status-copy">
+              <div class="status-live" data-status-value="status">Connecting</div>
+              <strong data-status-value="bot">Moonlight</strong>
+              <div class="status-meta">Uptime: <span data-status-value="uptime">--</span></div>
+            </div>
           </div>
           <div class="status-meta">
             <span data-lang="vi">Tự cập nhật mỗi 15 giây</span>
