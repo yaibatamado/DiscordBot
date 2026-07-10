@@ -1,5 +1,6 @@
 const { ChannelType, PermissionFlagsBits } = require('discord.js');
 const { VOICE_ROOM_PREFIX } = require('../commands/system/setup')._private;
+const { getGuildSettings } = require('../utils/guildSettings');
 
 const isPrivateVoiceRoom = (channel) => (
   channel?.type === ChannelType.GuildVoice &&
@@ -63,6 +64,9 @@ const notifyVoiceActivity = async (oldState, newState) => {
   if (oldState.channelId === newState.channelId) return false;
 
   const guild = newState.guild || oldState.guild;
+  const settings = await getGuildSettings(guild.id);
+  if (!settings.voiceLogEnabled) return false;
+
   const sends = [];
 
   if (oldState.channel && canSendToChannel(oldState.channel, guild)) {
@@ -79,7 +83,27 @@ const notifyVoiceActivity = async (oldState, newState) => {
   return true;
 };
 
+const cleanupGuildPrivateVoices = async (guild) => {
+  const channels = [...(guild.channels?.cache?.values?.() || [])];
+  const results = await Promise.all(
+    channels.map((channel) => cleanupPrivateVoice(channel).catch(() => false))
+  );
+
+  return results.filter(Boolean).length;
+};
+
 module.exports = (client) => {
+  client.once('clientReady', async () => {
+    const guilds = [...(client.guilds?.cache?.values?.() || [])];
+    const counts = await Promise.all(
+      guilds.map((guild) => cleanupGuildPrivateVoices(guild).catch(() => 0))
+    );
+    const deleted = counts.reduce((sum, count) => sum + count, 0);
+    if (deleted > 0) {
+      console.log(`Moonlight cleaned ${deleted} empty private voice room(s) on startup.`);
+    }
+  });
+
   client.on('voiceStateUpdate', async (oldState, newState) => {
     await notifyVoiceActivity(oldState, newState).catch(console.error);
 
@@ -95,6 +119,7 @@ module.exports._private = {
   buildVoiceActivityMessage,
   buildVoiceJoinMessage,
   buildVoiceLeaveMessage,
+  cleanupGuildPrivateVoices,
   cleanupPrivateVoice,
   isPrivateVoiceRoom,
   notifyVoiceActivity,

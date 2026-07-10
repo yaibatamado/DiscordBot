@@ -35,6 +35,7 @@ test('slash loader registers the public slash command set', () => {
 
   assert.deepEqual([...client.slashCommands.keys()].sort(), [
     'avatar',
+    'check',
     'dbstatus',
     'help',
     'join',
@@ -43,6 +44,7 @@ test('slash loader registers the public slash command set', () => {
     'moonlight',
     'music',
     'server',
+    'settings',
     'setup',
     'warn',
   ]);
@@ -75,6 +77,8 @@ test('prefix help replies with a command list embed', () => {
   assert.match(fieldValues, /\?help/);
   assert.match(fieldValues, /\/help/);
   assert.match(fieldValues, /\/moonlight/);
+  assert.match(fieldValues, /\/check/);
+  assert.match(fieldValues, /\/settings voice-log/);
   assert.match(fieldValues, /\?server/);
   assert.match(fieldValues, /\/music/);
   assert.match(fieldValues, /\/setup voice/);

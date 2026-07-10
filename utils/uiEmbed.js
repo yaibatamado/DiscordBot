@@ -31,7 +31,7 @@ const createEmbed = ({
     .setColor(colors[variant] || colors.default)
     .setTitle(title)
     .setDescription(description)
-    .setFooter({ text: footer })
+    .setFooter({ text: footer, iconURL: icons.system })
     .setTimestamp();
 
   if (thumbnail) embed.setThumbnail(thumbnail);

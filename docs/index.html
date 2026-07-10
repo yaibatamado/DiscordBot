@@ -394,6 +394,34 @@
       gap: 18px;
     }
 
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .status-card {
+      padding: 20px;
+      background: rgba(18, 27, 58, .72);
+      border: 1px solid var(--line);
+      box-shadow: var(--pixel);
+    }
+
+    .status-card span {
+      display: block;
+      color: var(--muted);
+      font-size: .82rem;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .status-card strong {
+      display: block;
+      margin-top: 8px;
+      color: var(--gold);
+      font-size: 1.35rem;
+    }
+
     .pixel-panel {
       position: relative;
       min-height: 280px;
@@ -565,6 +593,7 @@
       }
 
       .feature-grid,
+      .status-grid,
       .commands {
         grid-template-columns: 1fr;
       }
@@ -619,6 +648,7 @@
         <span>Moonlight</span>
       </a>
       <div class="nav-links">
+        <a href="#status"><span data-lang="vi">Trạng thái</span><span data-lang="en">Status</span></a>
         <a href="#features"><span data-lang="vi">Tính năng</span><span data-lang="en">Features</span></a>
         <a href="commands.html"><span data-lang="vi">Lệnh</span><span data-lang="en">Commands</span></a>
         <a href="https://discord.gg/6CxEZQu4Rb"><span data-lang="vi">Hỗ trợ</span><span data-lang="en">Support</span></a>
@@ -675,6 +705,34 @@
       <div class="hero-art" aria-hidden="true">
         <div class="moon-ring"></div>
         <img class="cat" src="assets/cat-pixel-art.jpg" alt="">
+      </div>
+    </section>
+
+    <section id="status" class="site-frame">
+      <div class="section-head">
+        <h2><span data-lang="vi">Trạng thái</span><span data-lang="en">Status</span></h2>
+        <p data-lang="vi">Bảng trạng thái nhanh cho bản bot hiện tại. Website chạy bằng GitHub Pages nên phần này là thông tin vận hành tĩnh.</p>
+        <p data-lang="en">A quick status board for the current bot build. This site runs on GitHub Pages, so this panel is static operational information.</p>
+      </div>
+      <div class="status-grid">
+        <div class="status-card">
+          <span data-lang="vi">Chế độ chạy</span>
+          <span data-lang="en">Runtime</span>
+          <strong>Self-hosted</strong>
+        </div>
+        <div class="status-card">
+          <span>Slash commands</span>
+          <strong>13</strong>
+        </div>
+        <div class="status-card">
+          <span>Database</span>
+          <strong>SQL Server</strong>
+        </div>
+        <a class="status-card" href="https://discord.gg/6CxEZQu4Rb">
+          <span data-lang="vi">Hỗ trợ</span>
+          <span data-lang="en">Support</span>
+          <strong>Discord</strong>
+        </a>
       </div>
     </section>
 
