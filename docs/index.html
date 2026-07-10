@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi">
+<html lang="vi" data-language="vi">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,9 +10,7 @@
     :root {
       color-scheme: dark;
       --bg: #080b17;
-      --bg-2: #0d1430;
       --panel: rgba(13, 19, 39, .88);
-      --panel-2: rgba(18, 27, 58, .82);
       --text: #f8f5ff;
       --muted: #b9c1e8;
       --soft: #6f7bb7;
@@ -20,7 +18,6 @@
       --line-strong: rgba(217, 229, 255, .42);
       --gold: #ffe28a;
       --blue: #82c7ff;
-      --violet: #a882ff;
       --shadow: rgba(0, 0, 0, .42);
       --pixel: 0 0 0 1px rgba(255, 255, 255, .14), 0 16px 50px rgba(0, 0, 0, .35);
     }
@@ -80,6 +77,20 @@
       max-width: 100%;
     }
 
+    [data-lang] {
+      display: none;
+    }
+
+    html[data-language="vi"] [data-lang="vi"],
+    html[data-language="en"] [data-lang="en"] {
+      display: revert;
+    }
+
+    html[data-language="vi"] span[data-lang="vi"],
+    html[data-language="en"] span[data-lang="en"] {
+      display: inline;
+    }
+
     .site-frame {
       width: min(1180px, calc(100% - 32px));
       margin: 0 auto;
@@ -119,16 +130,92 @@
       box-shadow: 0 0 24px rgba(130, 199, 255, .28);
     }
 
-    .nav-links {
+    .nav-links,
+    .nav-actions,
+    .language-toggle {
       display: flex;
       align-items: center;
+    }
+
+    .nav-links {
       gap: 18px;
       color: var(--muted);
       font-size: .9rem;
     }
 
+    .nav-actions {
+      gap: 14px;
+    }
+
     .nav-links a:hover {
       color: var(--gold);
+    }
+
+    .language-toggle {
+      gap: 6px;
+      padding: 5px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .06);
+    }
+
+    .language-toggle button {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      border: 0;
+      border-radius: 999px;
+      padding: 7px 10px;
+      color: var(--muted);
+      background: transparent;
+      font: inherit;
+      font-size: .82rem;
+      line-height: 1;
+    }
+
+    .language-toggle button[aria-pressed="true"] {
+      color: #111629;
+      background: var(--gold);
+    }
+
+    .flag {
+      position: relative;
+      display: inline-block;
+      width: 22px;
+      height: 15px;
+      flex: 0 0 auto;
+      overflow: hidden;
+      border-radius: 3px;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18);
+    }
+
+    .flag-vn {
+      background: #da251d;
+    }
+
+    .flag-vn::before {
+      content: "★";
+      position: absolute;
+      inset: -1px 0 0;
+      color: #ffeb3b;
+      font-size: 10px;
+      line-height: 15px;
+      text-align: center;
+    }
+
+    .flag-us {
+      background: repeating-linear-gradient(to bottom, #b22234 0 1.15px, #fff 1.15px 2.3px);
+    }
+
+    .flag-us::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 10px;
+      height: 8px;
+      background: #3c3b6e;
     }
 
     .pixel-button {
@@ -447,7 +534,7 @@
       color: var(--muted);
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 980px) {
       .nav {
         min-height: auto;
         padding: 18px 0;
@@ -456,6 +543,10 @@
 
       .nav-links {
         display: none;
+      }
+
+      .nav-actions {
+        margin-left: auto;
       }
 
       .hero,
@@ -484,6 +575,26 @@
 
       .section-head p {
         margin-top: 14px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .nav {
+        flex-wrap: wrap;
+      }
+
+      .nav-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .pixel-button {
+        min-height: 44px;
+        padding: 0 14px;
+      }
+
+      .language-toggle button {
+        padding: 7px 8px;
       }
     }
 
@@ -518,7 +629,16 @@
         <a href="terms.html">Terms</a>
         <a href="privacy.html">Privacy</a>
       </div>
-      <a class="pixel-button" href="https://discord.com/oauth2/authorize?client_id=1485928452283699230&permissions=8&scope=bot%20applications.commands">Invite</a>
+      <div class="nav-actions">
+        <div class="language-toggle" aria-label="Language">
+          <button type="button" data-set-language="vi" aria-pressed="true" title="Tiếng Việt"><span class="flag flag-vn" aria-hidden="true"></span>VI</button>
+          <button type="button" data-set-language="en" aria-pressed="false" title="English"><span class="flag flag-us" aria-hidden="true"></span>EN</button>
+        </div>
+        <a class="pixel-button" href="https://discord.com/oauth2/authorize?client_id=1485928452283699230&permissions=8&scope=bot%20applications.commands">
+          <span data-lang="vi">Mời bot</span>
+          <span data-lang="en">Invite</span>
+        </a>
+      </div>
     </nav>
   </header>
 
@@ -526,10 +646,17 @@
     <section class="site-frame hero">
       <div class="hero-copy">
         <h1>Moonlight</h1>
-        <p>Bot Discord phong cách pixel, gọn gàng và dễ dùng cho quản trị server, phòng voice riêng, dọn chat, cảnh báo, thông tin máy chủ và các tiện ích cộng đồng.</p>
+        <p data-lang="vi">Bot Discord phong cách pixel, gọn gàng và dễ dùng cho quản trị server, phòng voice riêng, dọn chat, cảnh báo, thông tin máy chủ và các tiện ích cộng đồng.</p>
+        <p data-lang="en">A pixel-art Discord bot for server management, private voice rooms, message cleanup, warnings, server information, and clean community utilities.</p>
         <div class="hero-actions">
-          <a class="pixel-button" href="https://discord.com/oauth2/authorize?client_id=1485928452283699230&permissions=8&scope=bot%20applications.commands">Invite Moonlight</a>
-          <a class="pixel-button secondary" href="#commands">View Commands</a>
+          <a class="pixel-button" href="https://discord.com/oauth2/authorize?client_id=1485928452283699230&permissions=8&scope=bot%20applications.commands">
+            <span data-lang="vi">Mời Moonlight</span>
+            <span data-lang="en">Invite Moonlight</span>
+          </a>
+          <a class="pixel-button secondary" href="#commands">
+            <span data-lang="vi">Xem lệnh</span>
+            <span data-lang="en">View Commands</span>
+          </a>
         </div>
         <div class="hero-terminal" aria-label="Moonlight command preview">
           <div class="terminal-bar"><span class="dot"></span></div>
@@ -551,23 +678,27 @@
     <section id="features" class="site-frame">
       <div class="section-head">
         <h2>Features</h2>
-        <p>Tập trung vào những thứ server cần mỗi ngày: quản trị rõ ràng, voice tiện, lệnh sạch và giao diện embed đẹp.</p>
+        <p data-lang="vi">Tập trung vào những thứ server cần mỗi ngày: quản trị rõ ràng, voice tiện, lệnh sạch và giao diện embed đẹp.</p>
+        <p data-lang="en">Built around daily server needs: clear moderation, practical voice tools, clean commands, and polished embeds.</p>
       </div>
       <div class="feature-grid">
         <article class="pixel-panel">
           <div class="panel-icon">▣</div>
           <h3>Server Tools</h3>
-          <p>Xem thông tin server, avatar, trạng thái bot, hướng dẫn lệnh và các trang điều khoản/chính sách rõ ràng.</p>
+          <p data-lang="vi">Xem thông tin server, avatar, trạng thái bot, hướng dẫn lệnh và các trang điều khoản/chính sách rõ ràng.</p>
+          <p data-lang="en">View server info, avatars, bot status, command help, and clear terms/privacy pages.</p>
         </article>
         <article class="pixel-panel">
           <div class="panel-icon">◉</div>
           <h3>Voice Rooms</h3>
-          <p>Tạo phòng voice hoặc text riêng bằng panel `/setup`, đổi tên, giới hạn người dùng, mời, chặn, chuyển chủ và xóa phòng.</p>
+          <p data-lang="vi">Tạo phòng voice hoặc text riêng bằng panel `/setup`, đổi tên, giới hạn người dùng, mời, chặn, chuyển chủ và xóa phòng.</p>
+          <p data-lang="en">Create private voice or text rooms with `/setup`, then rename, limit, invite, block, transfer, or delete them.</p>
         </article>
         <article class="pixel-panel">
           <div class="panel-icon">◆</div>
           <h3>Moderation</h3>
-          <p>Các lệnh mod cho clear tin nhắn, warn, timeout, ban, kick, slowmode, khóa hoặc mở khóa kênh.</p>
+          <p data-lang="vi">Các lệnh mod cho clear tin nhắn, warn, timeout, ban, kick, slowmode, khóa hoặc mở khóa kênh.</p>
+          <p data-lang="en">Moderation commands for message cleanup, warnings, timeout, ban, kick, slowmode, and channel lock/unlock.</p>
         </article>
       </div>
     </section>
@@ -576,17 +707,18 @@
       <div class="command-shell">
         <div class="command-title">
           <strong>Commands</strong>
-          <span>Một số lệnh chính của Moonlight.</span>
+          <span data-lang="vi">Một số lệnh chính của Moonlight.</span>
+          <span data-lang="en">Some of Moonlight's main commands.</span>
         </div>
         <div class="commands">
-          <div class="command"><code>/help</code>Danh sách lệnh và nhóm chức năng.</div>
-          <div class="command"><code>/setup</code>Tạo panel quản lý voice hoặc channel riêng.</div>
-          <div class="command"><code>/mod</code>Công cụ quản trị và chống spam.</div>
-          <div class="command"><code>/server</code>Xem thông tin máy chủ bằng embed.</div>
-          <div class="command"><code>/join</code>Cho bot treo trong voice channel.</div>
-          <div class="command"><code>/leave</code>Cho bot rời voice channel.</div>
-          <div class="command"><code>/music</code>Hướng dẫn dùng Jookie Music.</div>
-          <div class="command"><code>/moonlight</code>Thông tin bot và nút mời nhanh.</div>
+          <div class="command"><code>/help</code><span data-lang="vi">Danh sách lệnh và nhóm chức năng.</span><span data-lang="en">Command list and feature groups.</span></div>
+          <div class="command"><code>/setup</code><span data-lang="vi">Tạo panel quản lý voice hoặc channel riêng.</span><span data-lang="en">Create voice or private channel control panels.</span></div>
+          <div class="command"><code>/mod</code><span data-lang="vi">Công cụ quản trị và chống spam.</span><span data-lang="en">Moderation and anti-spam tools.</span></div>
+          <div class="command"><code>/server</code><span data-lang="vi">Xem thông tin máy chủ bằng embed.</span><span data-lang="en">Show server information in an embed.</span></div>
+          <div class="command"><code>/join</code><span data-lang="vi">Cho bot treo trong voice channel.</span><span data-lang="en">Keep the bot in a voice channel.</span></div>
+          <div class="command"><code>/leave</code><span data-lang="vi">Cho bot rời voice channel.</span><span data-lang="en">Make the bot leave voice.</span></div>
+          <div class="command"><code>/music</code><span data-lang="vi">Hướng dẫn dùng Jookie Music.</span><span data-lang="en">Guide for using Jookie Music.</span></div>
+          <div class="command"><code>/moonlight</code><span data-lang="vi">Thông tin bot và nút mời nhanh.</span><span data-lang="en">Bot info and quick invite button.</span></div>
         </div>
       </div>
     </section>
@@ -595,7 +727,8 @@
       <div class="legal-strip">
         <div>
           <h2>Safe & Clear</h2>
-          <p>Moonlight có trang điều khoản và chính sách bảo mật song ngữ, kèm nút đổi tiếng Việt/English.</p>
+          <p data-lang="vi">Moonlight có trang điều khoản và chính sách bảo mật song ngữ, kèm nút đổi tiếng Việt/English.</p>
+          <p data-lang="en">Moonlight includes bilingual terms and privacy pages with a Vietnamese/English language switcher.</p>
         </div>
         <div class="hero-actions">
           <a class="pixel-button secondary" href="terms.html">Terms</a>
@@ -607,7 +740,10 @@
 
   <footer>
     <div class="site-frame footer-grid">
-      <div>© 2026 Moonlight Bot. Built for calm Discord communities.</div>
+      <div>
+        <span data-lang="vi">© 2026 Moonlight Bot. Xây dựng cho những cộng đồng Discord gọn gàng và dễ dùng.</span>
+        <span data-lang="en">© 2026 Moonlight Bot. Built for calm and practical Discord communities.</span>
+      </div>
       <div class="footer-links">
         <a href="terms.html">Terms</a>
         <a href="privacy.html">Privacy</a>
@@ -615,5 +751,24 @@
       </div>
     </div>
   </footer>
+
+  <script>
+    const applyLanguage = (language) => {
+      const nextLanguage = language === 'en' ? 'en' : 'vi';
+      document.documentElement.dataset.language = nextLanguage;
+      document.documentElement.lang = nextLanguage;
+      localStorage.setItem('moonlight-language', nextLanguage);
+
+      document.querySelectorAll('[data-set-language]').forEach((button) => {
+        button.setAttribute('aria-pressed', String(button.dataset.setLanguage === nextLanguage));
+      });
+    };
+
+    document.querySelectorAll('[data-set-language]').forEach((button) => {
+      button.addEventListener('click', () => applyLanguage(button.dataset.setLanguage));
+    });
+
+    applyLanguage(localStorage.getItem('moonlight-language') || 'vi');
+  </script>
 </body>
 </html>
