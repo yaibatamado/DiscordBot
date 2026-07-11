@@ -3,6 +3,7 @@ const { commands, aliases } = require('../handlers/commandHandler');
 const logger = require('../utils/logger');
 const triggerHandler = require('../handlers/triggerHandler');
 const { handleAutoReply } = require('../services/autoReplyService');
+const { handleAfkMessage } = require('../services/afkService');
 
 const cooldowns = new Map();
 
@@ -10,6 +11,9 @@ module.exports = (client) => {
   client.on('messageCreate', async (message) => {
 
     if (message.author.bot) return;
+
+    const handledAfk = await handleAfkMessage(message);
+    if (handledAfk) return;
     
     // 🔥 fix riêng dấu "?"
     if (message.content.trim() === '?') {

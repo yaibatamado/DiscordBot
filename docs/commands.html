@@ -495,6 +495,32 @@
           </div>
         </article>
         <article class="command">
+          <h3><code>/confession setup channel:#confession</code><br><code>/confession send message:"..."</code><br><code>/confession view id:1</code> <code>/confession delete id:1</code></h3>
+          <div>
+            <p data-lang="vi">Gửi confession ẩn danh công khai về kênh đã setup. User có thể dùng lệnh ở bất kỳ kênh nào, nhưng bài confession chỉ đăng ở kênh confession duy nhất.</p>
+            <p data-lang="en">Send an anonymous public confession to the configured channel. Users can run the command anywhere, but confessions only post in the single confession channel.</p>
+            <ul>
+              <li data-lang="vi"><code>/confession setup</code> yêu cầu quyền Manage Server.</li>
+              <li data-lang="en"><code>/confession setup</code> requires Manage Server.</li>
+              <li data-lang="vi"><code>/confession delete</code> yêu cầu quyền Manage Messages.</li>
+              <li data-lang="en"><code>/confession delete</code> requires Manage Messages.</li>
+              <li data-lang="vi">Bot không tag ai trong confession để tránh ping ngoài ý muốn.</li>
+              <li data-lang="en">Moonlight disables mentions inside confessions to avoid unwanted pings.</li>
+            </ul>
+          </div>
+        </article>
+        <article class="command">
+          <h3><code>/afk set reason:"đang học"</code><br><code>/afk clear</code> <code>/afk status user:@name</code></h3>
+          <div>
+            <p data-lang="vi">Đặt trạng thái AFK cho bạn. Khi ai đó tag bạn, Moonlight sẽ báo lý do AFK; khi bạn nhắn lại, trạng thái tự tắt.</p>
+            <p data-lang="en">Set your AFK status. When someone mentions you, Moonlight reports your AFK reason; when you send a message again, it clears automatically.</p>
+            <ul>
+              <li data-lang="vi">AFK được lưu trong SQL Server nên bot restart vẫn không mất.</li>
+              <li data-lang="en">AFK is stored in SQL Server, so it survives bot restarts.</li>
+            </ul>
+          </div>
+        </article>
+        <article class="command">
           <h3><code>/letter send recipient:"An" message:"..." song:"505 - Arctic Monkeys" tag:nostalgia</code><br><code>/letter browse</code> <code>/letter search keyword:"moon"</code><br><code>/letter mine/edit/view/random/delete</code></h3>
           <div>
             <p data-lang="vi">Gửi một public song letter vào kênh hiện tại. Moonlight sẽ cho xem preview riêng tư trước, sau đó bạn bấm Post hoặc Cancel. <code>/letter browse</code> xem toàn bộ thư có phân trang; <code>/letter search</code> tìm theo người nhận, nội dung hoặc bài hát.</p>

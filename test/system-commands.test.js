@@ -138,6 +138,33 @@ test('anonymous embed does not include sender identity', () => {
   assert.doesNotMatch(JSON.stringify(embed.data), /user-1/);
 });
 
+test('confession command exposes setup channel and anonymous embeds', () => {
+  const confession = require('../commands/system/confession');
+  const command = confession.data.toJSON();
+  const names = command.options.map((option) => option.name);
+  const setup = command.options.find((option) => option.name === 'setup');
+  const embed = confession._private.buildConfessionEmbed({
+    id: 7,
+    content: 'hidden moon thought',
+  });
+
+  assert.ok(names.includes('setup'));
+  assert.ok(names.includes('send'));
+  assert.equal(setup.options.find((option) => option.name === 'channel').required, true);
+  assert.equal(embed.data.title, 'Moonlight Confession #7');
+  assert.match(embed.data.description, /hidden moon thought/);
+  assert.doesNotMatch(JSON.stringify(embed.data), /author/);
+});
+
+test('afk command exposes set clear status and formats time', () => {
+  const afk = require('../commands/system/afk');
+  const command = afk.data.toJSON();
+  const names = command.options.map((option) => option.name);
+
+  assert.deepEqual(names.sort(), ['clear', 'set', 'status']);
+  assert.equal(afk._private.formatAfkTime(new Date(Date.now() - 65 * 60 * 1000)), '1h 5m');
+});
+
 test('letter helper builds public song letter embeds and buttons', () => {
   const letterCommand = require('../commands/system/letter');
   const letter = {

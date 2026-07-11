@@ -34,10 +34,12 @@ test('slash loader registers the public slash command set', () => {
   loadSlash(client);
 
   assert.deepEqual([...client.slashCommands.keys()].sort(), [
+    'afk',
     'anonymous',
     'autoreply',
     'avatar',
     'check',
+    'confession',
     'currency',
     'dbstatus',
     'help',
@@ -90,6 +92,8 @@ test('prefix help replies with a command list embed', () => {
   assert.match(fieldValues, /\/check/);
   assert.match(fieldValues, /\/settings voice-log/);
   assert.match(fieldValues, /\/anonymous/);
+  assert.match(fieldValues, /\/confession setup/);
+  assert.match(fieldValues, /\/afk set/);
   assert.match(fieldValues, /\/letter/);
   assert.match(fieldValues, /\/weather/);
   assert.match(fieldValues, /\/time/);
