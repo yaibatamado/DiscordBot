@@ -76,3 +76,55 @@ test('weather helper resolves location and current weather', async () => {
   assert.match(embed.data.fields.map((field) => field.value).join('\n'), /Ho Chi Minh City, Ho Chi Minh, Vietnam/);
   assert.match(embed.data.footer.text, /Open-Meteo/);
 });
+
+test('time helper resolves timezone by location', async () => {
+  const time = require('../commands/system/time');
+  const fakeFetch = async () => ({
+    ok: true,
+    json: async () => ({
+      results: [{
+        name: 'Hanoi',
+        admin1: 'Ha Noi',
+        country: 'Vietnam',
+        timezone: 'Asia/Bangkok',
+      }],
+    }),
+  });
+
+  const result = await time._private.getTimeLocation(
+    'Hanoi',
+    fakeFetch,
+    new Date('2026-07-11T05:30:00Z')
+  );
+  const embed = time._private.buildTimeEmbed(result);
+
+  assert.equal(result.timezone, 'Asia/Bangkok');
+  assert.match(embed.data.title, /Hanoi/);
+  assert.match(embed.data.description, /12:30:00/);
+  assert.match(embed.data.fields.map((field) => field.value).join('\n'), /Asia\/Bangkok/);
+});
+
+test('currency helper converts amounts with latest rates', async () => {
+  const currency = require('../commands/system/currency');
+  const fakeFetch = async (url) => ({
+    ok: true,
+    json: async () => ({
+      result: 'success',
+      base_code: String(url).endsWith('/USD') ? 'USD' : 'UNKNOWN',
+      rates: { VND: 25000 },
+      time_last_update_utc: 'Sat, 11 Jul 2026 00:00:01 +0000',
+      time_next_update_utc: 'Sun, 12 Jul 2026 00:00:01 +0000',
+    }),
+  });
+
+  const result = await currency._private.getCurrencyRate({
+    amount: 2,
+    from: 'usd',
+    to: 'vnd',
+  }, fakeFetch);
+  const embed = currency._private.buildCurrencyEmbed(result);
+
+  assert.equal(result.converted, 50000);
+  assert.match(embed.data.title, /USD/);
+  assert.match(embed.data.description, /50,000/);
+});

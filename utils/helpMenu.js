@@ -17,6 +17,8 @@ const sections = [
       ['/server', 'Xem thông tin server bằng slash command'],
       ['/dbstatus', 'Kiểm tra kết nối SQL Server'],
       ['/weather <location>', 'Xem thời tiết theo địa điểm'],
+      ['/time <location>', 'Xem giờ hiện tại theo địa điểm'],
+      ['/currency <amount> <from> <to>', 'Đổi tiền tệ theo tỉ giá mới nhất'],
       ['/reload command', 'Owner-only reload command không cần restart bot'],
       ['/reload settings', 'Owner-only reload .env và settings cache'],
       ['/restart', 'Owner-only restart bot qua PM2'],

@@ -37,6 +37,7 @@ test('slash loader registers the public slash command set', () => {
     'autoreply',
     'avatar',
     'check',
+    'currency',
     'dbstatus',
     'help',
     'join',
@@ -50,6 +51,7 @@ test('slash loader registers the public slash command set', () => {
     'settings',
     'setup',
     'shutdown',
+    'time',
     'warn',
     'weather',
   ]);
@@ -85,6 +87,8 @@ test('prefix help replies with a command list embed', () => {
   assert.match(fieldValues, /\/check/);
   assert.match(fieldValues, /\/settings voice-log/);
   assert.match(fieldValues, /\/weather/);
+  assert.match(fieldValues, /\/time/);
+  assert.match(fieldValues, /\/currency/);
   assert.match(fieldValues, /\/reload command/);
   assert.match(fieldValues, /\?server/);
   assert.match(fieldValues, /\/music/);
