@@ -189,18 +189,28 @@ test('mysterybox command exposes setup and builds expiring boxes', () => {
     reward: 'Playlist note x1',
     claimedBy: 'user-1',
   });
+  const viClaimedEmbed = service.buildMysteryBoxEmbed({
+    id: 4,
+    boxType: 'question',
+    title: 'Question Box',
+    content: 'Question.',
+    claimedBy: 'user-2',
+    language: 'vi',
+  });
 
   assert.ok(names.includes('setup'));
   assert.ok(names.includes('status'));
   assert.equal(setup.options.find((option) => option.name === 'channel').required, true);
   assert.equal(setup.options.find((option) => option.name === 'enabled').required, true);
+  assert.equal(setup.options.find((option) => option.name === 'language').required, false);
   assert.equal(service.boxTemplates.length, 100);
   assert.ok(Object.values(service.activityPools).every((pool) => pool.length >= 10));
   assert.match(service.getClaimEvent('music'), /song|playlist|melody|frequency|track/i);
   assert.match(embed.data.fields.map((field) => field.value).join('\n'), /Expires in \*\*5 minutes\*\*/);
   assert.match(expiredEmbed.data.fields.map((field) => field.value).join('\n'), /Nobody claimed/);
-  assert.match(claimedEmbed.data.fields.map((field) => field.value).join('\n'), /Event:/);
+  assert.match(claimedEmbed.data.fields.map((field) => field.value).join('\n'), /live activity/);
   assert.doesNotMatch(claimedEmbed.data.fields.map((field) => field.value).join('\n'), /Playlist note/);
+  assert.match(viClaimedEmbed.data.fields.map((field) => field.name).join('\n'), /Cách chơi/);
 });
 
 test('serverwrapped command exposes setup and scheduler timing', () => {

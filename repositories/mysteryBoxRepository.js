@@ -6,6 +6,7 @@ const mapSettings = (row) => {
     guildId: row.guild_id,
     channelId: row.channel_id,
     enabled: Boolean(row.is_enabled),
+    language: row.language_code || 'en',
     updatedBy: row.updated_by,
     updatedAt: row.updated_at,
   };
@@ -22,6 +23,7 @@ const mapBox = (row) => {
     title: row.title_text,
     content: row.content_text,
     reward: row.reward_text,
+    language: row.language_code || 'en',
     sentKey: row.sent_key,
     claimedBy: row.claimed_by,
     claimedAt: row.claimed_at,
@@ -44,6 +46,7 @@ const createMysteryBoxRepository = (database = db) => {
           guild_id NVARCHAR(32) NOT NULL PRIMARY KEY,
           channel_id NVARCHAR(32) NULL,
           is_enabled BIT NOT NULL CONSTRAINT DF_MoonlightMysteryBoxSettings_is_enabled DEFAULT (1),
+          language_code NVARCHAR(8) NOT NULL CONSTRAINT DF_MoonlightMysteryBoxSettings_language_code DEFAULT ('en'),
           updated_by NVARCHAR(32) NULL,
           updated_at DATETIME2 NOT NULL CONSTRAINT DF_MoonlightMysteryBoxSettings_updated_at DEFAULT (SYSUTCDATETIME())
         );
@@ -60,6 +63,7 @@ const createMysteryBoxRepository = (database = db) => {
           title_text NVARCHAR(120) NOT NULL,
           content_text NVARCHAR(800) NOT NULL,
           reward_text NVARCHAR(300) NOT NULL,
+          language_code NVARCHAR(8) NOT NULL CONSTRAINT DF_MoonlightMysteryBoxes_language_code DEFAULT ('en'),
           sent_key NVARCHAR(32) NOT NULL,
           claimed_by NVARCHAR(32) NULL,
           claimed_at DATETIME2 NULL,
@@ -78,6 +82,18 @@ const createMysteryBoxRepository = (database = db) => {
           ADD channel_id NVARCHAR(32) NULL;
       END
 
+      IF COL_LENGTH('dbo.MoonlightMysteryBoxSettings', 'language_code') IS NULL
+      BEGIN
+        ALTER TABLE dbo.MoonlightMysteryBoxSettings
+          ADD language_code NVARCHAR(8) NOT NULL CONSTRAINT DF_MoonlightMysteryBoxSettings_language_code DEFAULT ('en');
+      END
+
+      IF COL_LENGTH('dbo.MoonlightMysteryBoxes', 'language_code') IS NULL
+      BEGIN
+        ALTER TABLE dbo.MoonlightMysteryBoxes
+          ADD language_code NVARCHAR(8) NOT NULL CONSTRAINT DF_MoonlightMysteryBoxes_language_code DEFAULT ('en');
+      END
+
       IF COL_LENGTH('dbo.MoonlightMysteryBoxes', 'expires_at') IS NULL
       BEGIN
         ALTER TABLE dbo.MoonlightMysteryBoxes
@@ -93,23 +109,24 @@ const createMysteryBoxRepository = (database = db) => {
     tableReady = true;
   };
 
-  const setSettings = async ({ guildId, channelId = null, enabled, updatedBy }) => {
+  const setSettings = async ({ guildId, channelId = null, enabled, language = 'en', updatedBy }) => {
     await ensureTable();
     const pool = await database.getPool();
     const result = await pool.request()
       .input('guildId', guildId)
       .input('channelId', channelId)
       .input('enabled', enabled ? 1 : 0)
+      .input('language', language)
       .input('updatedBy', updatedBy)
       .query(`
         MERGE dbo.MoonlightMysteryBoxSettings AS target
         USING (SELECT @guildId AS guild_id) AS source
           ON target.guild_id = source.guild_id
         WHEN MATCHED THEN
-          UPDATE SET channel_id = @channelId, is_enabled = @enabled, updated_by = @updatedBy, updated_at = SYSUTCDATETIME()
+          UPDATE SET channel_id = @channelId, is_enabled = @enabled, language_code = @language, updated_by = @updatedBy, updated_at = SYSUTCDATETIME()
         WHEN NOT MATCHED THEN
-          INSERT (guild_id, channel_id, is_enabled, updated_by)
-          VALUES (@guildId, @channelId, @enabled, @updatedBy)
+          INSERT (guild_id, channel_id, is_enabled, language_code, updated_by)
+          VALUES (@guildId, @channelId, @enabled, @language, @updatedBy)
         OUTPUT INSERTED.*;
       `);
     return mapSettings(result.recordset[0]);
@@ -135,7 +152,7 @@ const createMysteryBoxRepository = (database = db) => {
     return result.recordset.map(mapSettings);
   };
 
-  const addBox = async ({ guildId, channelId, boxType, title, content, reward, sentKey, expiresAt }) => {
+  const addBox = async ({ guildId, channelId, boxType, title, content, reward, language = 'en', sentKey, expiresAt }) => {
     await ensureTable();
     const pool = await database.getPool();
     const result = await pool.request()
@@ -145,14 +162,15 @@ const createMysteryBoxRepository = (database = db) => {
       .input('title', title)
       .input('content', content)
       .input('reward', reward)
+      .input('language', language)
       .input('sentKey', sentKey)
       .input('expiresAt', expiresAt)
       .query(`
         INSERT INTO dbo.MoonlightMysteryBoxes (
-          guild_id, channel_id, box_type, title_text, content_text, reward_text, sent_key, expires_at
+          guild_id, channel_id, box_type, title_text, content_text, reward_text, language_code, sent_key, expires_at
         )
         OUTPUT INSERTED.*
-        VALUES (@guildId, @channelId, @boxType, @title, @content, @reward, @sentKey, @expiresAt)
+        VALUES (@guildId, @channelId, @boxType, @title, @content, @reward, @language, @sentKey, @expiresAt)
       `);
     return mapBox(result.recordset[0]);
   };

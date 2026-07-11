@@ -15,13 +15,14 @@ const {
 const buildSettingsEmbed = (settings) => createEmbed({
   title: 'Mystery Box Settings',
   description: settings?.enabled
-    ? 'Mystery Box is enabled. Moonlight will drop a random box every 10 minutes in the configured channel.'
+    ? 'Mystery Box is enabled. Moonlight will drop a random activity box every 10 minutes in the configured channel.'
     : 'Mystery Box is disabled.',
   variant: settings?.enabled ? 'success' : 'warning',
   thumbnail: icons.system,
   fields: [
     { name: 'Channel', value: settings?.channelId ? `<#${settings.channelId}>` : 'Not set', inline: true },
     { name: 'Interval', value: 'Every 10 minutes', inline: true },
+    { name: 'Language', value: settings?.language === 'vi' ? 'Vietnamese' : 'English', inline: true },
   ],
   footer: 'Moonlight Mystery Box',
 });
@@ -37,6 +38,7 @@ const executeSetup = async (interaction) => {
 
   const enabled = interaction.options.getBoolean('enabled', true);
   const channel = interaction.options.getChannel('channel', true);
+  const language = interaction.options.getString('language') || 'en';
 
   if (!canSendInChannel(interaction.guild, channel)) {
     await interaction.reply({
@@ -50,6 +52,7 @@ const executeSetup = async (interaction) => {
     guildId: interaction.guildId,
     channelId: channel.id,
     enabled,
+    language,
     updatedBy: interaction.user.id,
   });
 
@@ -72,6 +75,7 @@ const executePreview = async (interaction) => {
   await interaction.reply({
     embeds: [buildMysteryBoxEmbed({
       id: 'preview',
+      language: 'en',
       ...payload,
     })],
     flags: MessageFlags.Ephemeral,
@@ -114,6 +118,16 @@ module.exports = {
             .setName('enabled')
             .setDescription('Whether Mystery Box should auto-drop every 10 minutes')
             .setRequired(true)
+        )
+        .addStringOption((option) =>
+          option
+            .setName('language')
+            .setDescription('Language for Mystery Box activities')
+            .setRequired(false)
+            .addChoices(
+              { name: 'English', value: 'en' },
+              { name: 'Tiếng Việt', value: 'vi' }
+            )
         )
     )
     .addSubcommand((subcommand) =>

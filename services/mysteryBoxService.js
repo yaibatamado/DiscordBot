@@ -258,6 +258,201 @@ const activityPools = {
   ],
 };
 
+const activityPoolsVi = {
+  story: [
+    'Kể chuyện nối tiếp: người claim viết câu đầu, 2 người tiếp theo mỗi người viết thêm 1 câu.',
+    'Mở truyện bằng câu: "Lúc 3 giờ sáng, mặt trăng gửi một thông báo..."',
+    'Viết một truyền thuyết nhỏ về tên kênh hiện tại.',
+    'Kể một chuyện 3 câu, trong đó phải có: mặt trăng, cánh cửa, bí mật.',
+    'Người claim viết 7 từ mở đầu, người tiếp theo tiếp tục đúng 7 từ.',
+    'Tạo một chuyện cổ tích một dòng, phản diện là deadline.',
+    'Viết một câu chuyện từ góc nhìn của chiếc hộp bí ẩn.',
+    'Tạo câu kết thật drama, người khác viết chuyện xảy ra trước đó.',
+    'Kể một chuyện nơi vật gần bạn nhất trở thành đồ phép thuật.',
+    'Viết câu đầu cho một vụ án dễ thương trong server.',
+  ],
+  riddle: [
+    'Câu đố: Càng chia sẻ càng lớn, càng được nghe càng nhẹ. Là gì?',
+    'Câu đố: Có phím nhưng không mở được cửa. Là gì?',
+    'Câu đố: Càng lấy đi thì càng lớn. Là gì?',
+    'Câu đố: Không có miệng nhưng vẫn nói, bị lơ đi thì biến mất. Là gì?',
+    'Câu đố: Bay không cánh, khóc không mắt. Là gì?',
+    'Câu đố: Nhiều lỗ nhưng vẫn giữ được nước. Là gì?',
+    'Câu đố: Khi bạn chia sẻ tôi, tôi mới thành của bạn. Là gì?',
+    'Câu đố: Không sống nhưng có thể lớn lên trong chat. Là gì?',
+    'Câu đố: Có thể bị phá, được tạo, được kể và được chơi. Là gì?',
+    'Câu đố: Theo bạn ngoài sáng, biến mất khi tối quá. Là gì?',
+  ],
+  compliment: [
+    'Vòng khen: người claim chọn một người và nói một câu tốt đẹp về họ.',
+    'Mỗi người có thể gửi một lời khen ngắn cho ai đó trong kênh.',
+    'Nói một điều bạn thích ở người claim hoặc server hôm nay.',
+    'Trao một chiếc cúp tưởng tượng cho ai đó và nói lý do.',
+    'Người claim khen một người, người đó khen tiếp một người khác.',
+    'Gửi một câu mà một người đang mệt có thể cần nghe.',
+    'Nhắc tên một người đã làm chat vui hơn tuần này.',
+    'Nói một điểm mạnh bạn từng thấy ở ai đó trong server.',
+    'Cảm ơn một người vì một việc nhỏ họ từng làm.',
+    'Gửi một lời động viên ngắn, không cần tag ai cũng được.',
+  ],
+  music: [
+    'Mini playlist: mỗi người gửi một bài hát hợp mood hiện tại.',
+    'Gửi một bài nhạc nghe hợp lúc đêm muộn.',
+    'Chọn một bài làm nhạc nền cho server hôm nay.',
+    'Gửi một bài hát khiến bạn thấy nhẹ hơn.',
+    'Gửi một bài gắn với một kỷ niệm vô hại.',
+    'Người claim đặt tên playlist, mọi người góp bài.',
+    'Gửi một bài phù hợp nếu hôm nay là cảnh cuối phim.',
+    'Mô tả mood hôm nay như bìa album.',
+    'Gửi một bài để làm boss theme khi dọn việc nhà.',
+    'Gửi một bài và nói 1 câu vì sao nó hợp lúc này.',
+  ],
+  question: [
+    'Câu hỏi hôm nay: điều nhỏ nào làm hôm nay dễ chịu hơn?',
+    'Nếu có thể bỏ một thứ vào túi để thấy an tâm, bạn chọn gì?',
+    'Bạn đang mong chờ điều gì, dù rất nhỏ?',
+    'Một thói quen nhỏ nào thật sự giúp bạn?',
+    'Nếu được ghé một nơi hư cấu một buổi tối, bạn chọn đâu?',
+    'Món ăn/vị gì hợp mood của bạn hiện tại?',
+    'Bạn muốn học thứ gì một cách vui vẻ, không áp lực?',
+    'Điều gì khiến một server trở nên dễ vào chuyện?',
+    'Phiên bản nhỏ hơn của bạn sẽ bất ngờ vì điều gì ở bạn bây giờ?',
+    'Có điều gì bạn thích trước khi nó nổi tiếng không?',
+  ],
+  quest: [
+    'Nhiệm vụ nhỏ: gửi một câu tử tế vào kênh.',
+    'Nhiệm vụ nhỏ: mô tả mood bằng đúng 3 emoji.',
+    'Nhiệm vụ nhỏ: kể một fun fact vô hại trong ngày của bạn.',
+    'Nhiệm vụ nhỏ: uống nước rồi nhắn "đã nạp nước".',
+    'Nhiệm vụ nhỏ: dọn một thứ rất nhỏ quanh bạn trong 1 phút.',
+    'Nhiệm vụ nhỏ: giới thiệu một app/site/tool hữu ích.',
+    'Nhiệm vụ nhỏ: hỏi cả kênh một câu dễ trả lời.',
+    'Nhiệm vụ nhỏ: kể một việc bạn sẽ làm sau tin nhắn này.',
+    'Nhiệm vụ nhỏ: viết bản tin thời tiết 5 từ cho mood của bạn.',
+    'Nhiệm vụ nhỏ: gửi một ảnh hoặc mô tả thứ đẹp bạn thấy gần đây.',
+  ],
+  quote: [
+    'Tạo một câu quote giả kiểu lời khuyên màn hình loading.',
+    'Chế một câu tục ngữ cổ xưa giả về Discord.',
+    'Viết một câu hợp để đặt dưới ảnh mặt trăng.',
+    'Tạo motto cho những người buồn ngủ nhưng vẫn cố gắng.',
+    'Viết một câu thật drama về việc mở hộp bí ẩn.',
+    'Gửi một lời nhắc dịu dàng trong tối đa 12 từ.',
+    'Viết một câu bắt đầu bằng: "Ngay cả bây giờ..."',
+    'Biến mood hiện tại thành một câu quote giả truyền cảm hứng.',
+    'Viết một câu nghe bình yên, can đảm hoặc đẹp một cách quá đà.',
+    'Tạo một câu fortune cookie cho server.',
+  ],
+  chaos: [
+    'Vòng hỗn loạn: mô tả chiếc hộp bằng một tính từ đáng nghi.',
+    'Bịa một luật vô dụng mà server phải tuân thủ trong 60 giây.',
+    'Đặt tên cho một vật phẩm tưởng tượng không nên tồn tại.',
+    'Đổi tên mặt trăng thật tệ trong một tin nhắn.',
+    'Mô tả ngày hôm nay như patch note giả.',
+    'Bịa một siêu năng lực vô dụng và tác dụng phụ của nó.',
+    'Viết nhãn cảnh báo cho kênh này.',
+    'Giải thích một đồ vật bình thường như ma thuật bị cấm.',
+    'Tạo achievement giả cho người claim.',
+    'Bịa một âm mưu vô hại về đồ ăn vặt.',
+  ],
+  game: [
+    'Mini game: người claim hỏi Would You Rather, mọi người trả lời A hoặc B.',
+    'Mini game: chơi 2 sự thật và 1 lời nói dối nhỏ.',
+    'Mini game: chọn trà mặt trăng, bánh sao hoặc súp mây và bảo vệ lựa chọn.',
+    'Mini game: người đầu tiên reply một từ 5 chữ sẽ đặt chủ đề.',
+    'Mini game: mô tả một bộ phim thật tệ để mọi người đoán.',
+    'Mini game: nối chữ, reply sau bắt đầu bằng chữ cuối reply trước.',
+    'Mini game: người claim gửi 3 emoji, mọi người đoán câu chuyện.',
+    'Mini game: chấm vibe hiện tại từ 1-10 bằng đúng 1 từ.',
+    'Mini game: tạo shop tưởng tượng và chọn một món.',
+    'Mini game: gọi tên một màu, mọi người reply một thứ có màu đó.',
+  ],
+  lore: [
+    'Lore server: thêm một câu vào lịch sử tưởng tượng của server.',
+    'Đặt tên cho người canh giữ kênh này.',
+    'Mô tả căn phòng bí mật phía sau chat.',
+    'Tạo tên cho lễ hội trong thế giới Moonlight.',
+    'Viết một dòng trong lời tiên tri thất lạc của server.',
+    'Bịa một lời nguyền vô hại do thiếu ngủ.',
+    'Đặt tên chương tiếp theo của server.',
+    'Tạo một địa danh hư cấu trong Moonlight và mô tả bằng 5 từ.',
+    'Viết tiêu đề cho cảnh chat hiện tại.',
+    'Bịa một truyền thuyết bắt đầu bằng: "Từ thời chưa có pin..."',
+  ],
+  daily: [
+    'Reset nhẹ: kể một chiến thắng nhỏ hôm nay.',
+    'Chọn một việc nhỏ có thể làm trong 10 phút tới.',
+    'Gửi một lời nhắc mà bạn của tương lai cần nghe.',
+    'Viết một điều bạn được phép ngừng nghĩ quá nhiều.',
+    'Chọn một từ cho phần còn lại của ngày.',
+    'Chia sẻ một món ăn, đồ uống hoặc âm thanh khiến bạn dễ chịu.',
+    'Đặt một ý định nhỏ cho một giờ tới.',
+    'Nói một điều bạn đã vượt qua trong tuần này.',
+    'Kể một thứ xứng đáng bị bớt căng thẳng lại.',
+    'Gửi một câu để khép ngày nhẹ nhàng hơn.',
+  ],
+};
+
+const labels = {
+  en: {
+    activity: 'Mystery Activity',
+    claimedBy: 'Claimed By',
+    openedBy: 'Opened By',
+    fromBox: 'From Box',
+    type: 'Activity Type',
+    howToPlay: 'How to play',
+    howToPlayValue: 'Reply in this channel. No inventory needed, this is a live chat activity.',
+    expires: 'Press **Claim** to open a live activity. Expires in **5 minutes**.',
+    expired: 'Nobody claimed this box within 5 minutes.',
+    opened: 'Opened a live activity in this box.',
+    footer: 'Moonlight Mystery Box - appears every 10 minutes when enabled',
+  },
+  vi: {
+    activity: 'Hoạt Động Bí Ẩn',
+    claimedBy: 'Người Mở Hộp',
+    openedBy: 'Người Mở',
+    fromBox: 'Từ Hộp',
+    type: 'Loại Hoạt Động',
+    howToPlay: 'Cách chơi',
+    howToPlayValue: 'Trả lời ngay trong kênh này. Không có túi đồ, đây là hoạt động chat trực tiếp.',
+    expires: 'Bấm **Claim** để mở một hoạt động trong chat. Hết hạn sau **5 phút**.',
+    expired: 'Không ai claim hộp này trong 5 phút.',
+    opened: 'Đã mở hoạt động trực tiếp trong hộp này.',
+    footer: 'Moonlight Mystery Box - tự xuất hiện mỗi 10 phút khi bật',
+  },
+};
+
+const activityTitles = {
+  en: {
+    story: 'Story Chain',
+    riddle: 'Riddle',
+    compliment: 'Compliment Chain',
+    music: 'Mini Playlist',
+    question: 'Question of the Moment',
+    quest: 'Mini Quest',
+    quote: 'Quote Maker',
+    chaos: 'Chaos Round',
+    game: 'Mini Game',
+    lore: 'Server Lore',
+    daily: 'Daily Reset',
+  },
+  vi: {
+    story: 'Kể Chuyện Nối Tiếp',
+    riddle: 'Câu Đố',
+    compliment: 'Vòng Khen Nhau',
+    music: 'Mini Playlist',
+    question: 'Câu Hỏi Hôm Nay',
+    quest: 'Nhiệm Vụ Nhỏ',
+    quote: 'Tạo Quote',
+    chaos: 'Vòng Hỗn Loạn',
+    game: 'Mini Game',
+    lore: 'Lore Server',
+    daily: 'Reset Nhẹ',
+  },
+};
+
+const normalizeLanguage = (language) => (language === 'vi' ? 'vi' : 'en');
+
 const getActivityKey = (box = {}) => {
   const title = String(box.title || '').toLowerCase();
   const content = String(box.content || '').toLowerCase();
@@ -272,28 +467,19 @@ const getActivityKey = (box = {}) => {
   return activityPools[box.boxType] ? box.boxType : 'daily';
 };
 
-const getClaimActivity = (box = {}) => {
+const getClaimActivity = (box = {}, language = box.language) => {
   const key = getActivityKey(box);
+  const lang = normalizeLanguage(language);
+  const pool = lang === 'vi' ? activityPoolsVi[key] : activityPools[key];
   return {
     key,
-    title: {
-      story: 'Story Spark Activity',
-      riddle: 'Riddle Activity',
-      compliment: 'Compliment Activity',
-      music: 'Playlist Activity',
-      question: 'Question Activity',
-      quest: 'Mini Quest Activity',
-      quote: 'Quote Spark Activity',
-      chaos: 'Chaos Activity',
-      game: 'Mini Game Activity',
-      lore: 'Lore Activity',
-      daily: 'Daily Reset Activity',
-    }[key],
-    prompt: randomItem(activityPools[key]),
+    title: activityTitles[lang][key],
+    prompt: randomItem(pool),
+    language: lang,
   };
 };
 
-const getClaimEvent = (boxType) => getClaimActivity({ boxType }).prompt;
+const getClaimEvent = (boxType, language = 'en') => getClaimActivity({ boxType, language }, language).prompt;
 
 const buildClaimActivityEmbed = (box, activity = getClaimActivity(box)) => createEmbed({
   title: activity.title,
@@ -301,33 +487,40 @@ const buildClaimActivityEmbed = (box, activity = getClaimActivity(box)) => creat
   variant: 'system',
   thumbnail: icons.system,
   fields: [
-    { name: 'Opened By', value: `<@${box.claimedBy}>`, inline: true },
-    { name: 'From Box', value: `${box.title} #${box.id}`, inline: true },
-    { name: 'How to play', value: 'Reply in this channel. No inventory needed, this is a live chat activity.', inline: false },
+    { name: labels[activity.language].openedBy, value: `<@${box.claimedBy}>`, inline: true },
+    { name: labels[activity.language].fromBox, value: `${box.title} #${box.id}`, inline: true },
+    { name: labels[activity.language].howToPlay, value: labels[activity.language].howToPlayValue, inline: false },
   ],
-  footer: 'Moonlight Mystery Activity',
+  footer: labels[activity.language].activity,
 });
 
-const buildMysteryBoxEmbed = (box) => createEmbed({
-  title: box.title,
-  description: box.content,
+const buildMysteryBoxEmbed = (box, options = {}) => {
+  const lang = normalizeLanguage(options.language || box.language);
+  const activity = box.claimedBy ? getClaimActivity(box, lang) : null;
+  const text = labels[lang];
+
+  return createEmbed({
+  title: activity ? activity.title : box.title,
+  description: activity ? activity.prompt : box.content,
   variant: box.claimedBy ? 'success' : box.expiredAt ? 'warning' : 'system',
   thumbnail: icons.system,
   fields: [
     { name: 'Box ID', value: `#${box.id}`, inline: true },
-    { name: 'Type', value: box.boxType, inline: true },
+    { name: text.type, value: activity?.title || box.boxType, inline: true },
     {
-      name: box.claimedBy ? 'Claimed By' : box.expiredAt ? 'Expired' : 'Mystery Activity',
+      name: box.claimedBy ? text.claimedBy : box.expiredAt ? 'Expired' : text.activity,
       value: box.claimedBy
-        ? `<@${box.claimedBy}>\n\n**Event:** A live activity opened in chat.`
+        ? `<@${box.claimedBy}>\n\n${text.opened}`
         : box.expiredAt
-          ? 'Nobody claimed this box within 5 minutes.'
-          : 'Press **Claim** to open it first. Expires in **5 minutes**.',
+          ? text.expired
+          : text.expires,
       inline: false,
     },
+    ...(activity ? [{ name: text.howToPlay, value: text.howToPlayValue, inline: false }] : []),
   ],
-  footer: 'Moonlight Mystery Box - appears every 10 minutes when enabled',
+  footer: text.footer,
 });
+};
 
 const buildClaimRow = (box) => [
   new ActionRowBuilder().addComponents(
@@ -384,6 +577,7 @@ const sendMysteryBox = async (client, settings, now = new Date()) => {
     box = await mysteryBoxRepository.addBox({
       guildId: guild.id,
       channelId: channel.id,
+      language: settings.language,
       sentKey,
       expiresAt,
       ...payload,
@@ -393,7 +587,7 @@ const sendMysteryBox = async (client, settings, now = new Date()) => {
   }
 
   const message = await channel.send({
-    embeds: [buildMysteryBoxEmbed(box)],
+    embeds: [buildMysteryBoxEmbed(box, { language: settings.language })],
     components: buildClaimRow(box),
     allowedMentions: { parse: [] },
   });
@@ -464,19 +658,10 @@ const handleMysteryBoxClaim = async (interaction) => {
     return true;
   }
 
-  const activity = getClaimActivity(claimed);
-
   await interaction.update({
     embeds: [buildMysteryBoxEmbed(claimed)],
     components: buildClaimRow(claimed),
     allowedMentions: { parse: [] },
-  });
-
-  await interaction.followUp({
-    embeds: [buildClaimActivityEmbed(claimed, activity)],
-    allowedMentions: { users: [interaction.user.id] },
-  }).catch((error) => {
-    console.error('Mystery box activity send failed:', error);
   });
   return true;
 };

@@ -4,6 +4,7 @@ BEGIN
     guild_id NVARCHAR(32) NOT NULL PRIMARY KEY,
     channel_id NVARCHAR(32) NULL,
     is_enabled BIT NOT NULL CONSTRAINT DF_MoonlightMysteryBoxSettings_is_enabled DEFAULT (1),
+    language_code NVARCHAR(8) NOT NULL CONSTRAINT DF_MoonlightMysteryBoxSettings_language_code DEFAULT ('en'),
     updated_by NVARCHAR(32) NULL,
     updated_at DATETIME2 NOT NULL CONSTRAINT DF_MoonlightMysteryBoxSettings_updated_at DEFAULT (SYSUTCDATETIME())
   );
@@ -20,6 +21,7 @@ BEGIN
     title_text NVARCHAR(120) NOT NULL,
     content_text NVARCHAR(800) NOT NULL,
     reward_text NVARCHAR(300) NOT NULL,
+    language_code NVARCHAR(8) NOT NULL CONSTRAINT DF_MoonlightMysteryBoxes_language_code DEFAULT ('en'),
     sent_key NVARCHAR(32) NOT NULL,
     claimed_by NVARCHAR(32) NULL,
     claimed_at DATETIME2 NULL,
@@ -30,4 +32,16 @@ BEGIN
 
   CREATE UNIQUE INDEX UX_MoonlightMysteryBoxes_guild_sent
     ON dbo.MoonlightMysteryBoxes (guild_id, sent_key);
+END
+
+IF COL_LENGTH('dbo.MoonlightMysteryBoxSettings', 'language_code') IS NULL
+BEGIN
+  ALTER TABLE dbo.MoonlightMysteryBoxSettings
+    ADD language_code NVARCHAR(8) NOT NULL CONSTRAINT DF_MoonlightMysteryBoxSettings_language_code DEFAULT ('en');
+END
+
+IF COL_LENGTH('dbo.MoonlightMysteryBoxes', 'language_code') IS NULL
+BEGIN
+  ALTER TABLE dbo.MoonlightMysteryBoxes
+    ADD language_code NVARCHAR(8) NOT NULL CONSTRAINT DF_MoonlightMysteryBoxes_language_code DEFAULT ('en');
 END
