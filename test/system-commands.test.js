@@ -195,10 +195,12 @@ test('mysterybox command exposes setup and builds expiring boxes', () => {
   assert.equal(setup.options.find((option) => option.name === 'channel').required, true);
   assert.equal(setup.options.find((option) => option.name === 'enabled').required, true);
   assert.equal(service.boxTemplates.length, 100);
+  assert.ok(Object.values(service.activityPools).every((pool) => pool.length >= 10));
   assert.match(service.getClaimEvent('music'), /song|playlist|melody|frequency|track/i);
   assert.match(embed.data.fields.map((field) => field.value).join('\n'), /Expires in \*\*5 minutes\*\*/);
   assert.match(expiredEmbed.data.fields.map((field) => field.value).join('\n'), /Nobody claimed/);
   assert.match(claimedEmbed.data.fields.map((field) => field.value).join('\n'), /Event:/);
+  assert.doesNotMatch(claimedEmbed.data.fields.map((field) => field.value).join('\n'), /Playlist note/);
 });
 
 test('serverwrapped command exposes setup and scheduler timing', () => {

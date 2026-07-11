@@ -123,60 +123,190 @@ const boxTtlMs = 5 * 60 * 1000;
 
 const randomItem = (items) => items[Math.floor(Math.random() * items.length)];
 
-const claimEvents = {
-  fortune: [
-    'A silver spark circles the room. Your next message carries a little extra luck.',
-    'The box opens into a soft omen: choose the brave option once today.',
-    'Moonlight marks this claim as a lucky turn. Small chances feel slightly warmer.',
+const activityPools = {
+  story: [
+    'Start a 3-message story chain. The first line must include: moon, window, and secret.',
+    'Write the first 7 words of a tiny story. The next person continues with exactly 7 words.',
+    'Create a micro story where the last object you touched becomes magical.',
+    'Start a story with: "At 3 AM, the moon sent a notification..."',
+    'Write one sentence about a door that only opens when someone laughs.',
+    'Create a tiny legend about the current channel name.',
+    'Start a cozy mystery. The first clue is something blue.',
+    'Write a one-line fairy tale where the villain is a calendar reminder.',
+    'Begin a story from the point of view of the mystery box.',
+    'Create a dramatic final line. The next person must write what happened before it.',
   ],
-  question: [
-    'A question floats out and waits for an answer in chat.',
-    'The box asks everyone nearby to share one tiny honest thought.',
-    'A quiet prompt appears. The claimer gets to start the next conversation.',
-  ],
-  quest: [
-    'A mini quest begins. Complete the prompt and claim moral victory.',
-    'The box assigns a harmless side quest to the claimer.',
-    'A task marker appears above the chat. The reward is good room energy.',
-  ],
-  quote: [
-    'The quote glows brighter after being claimed.',
-    'The box pins this sentence to the night for a moment.',
-    'A small line of wisdom escapes and politely refuses to be forgotten.',
-  ],
-  chaos: [
-    'The lid pops open dramatically. Nothing explodes, which is honestly suspicious.',
-    'A harmless chaos pulse shakes the box and improves the room by 1 nonsense.',
-    'The box briefly becomes too powerful, then calms down.',
-  ],
-  music: [
-    'A tiny playlist note drops out. The claimer should share a song if they want.',
-    'The box tunes the room to a late-night frequency.',
-    'A melody fragment appears. Someone owes the chat one good track.',
+  riddle: [
+    'Riddle round: I get bigger when shared and lighter when heard. Answer: a story.',
+    'Riddle round: I speak without a mouth and disappear when ignored. What am I?',
+    'Riddle round: The more you take from me, the bigger I become. What am I?',
+    'Riddle round: I can be cracked, made, told, and played. What am I?',
+    'Riddle round: I follow you in light but vanish when things get too dark. What am I?',
+    'Riddle round: I have keys but open no doors. What am I?',
+    'Riddle round: I fly without wings and cry without eyes. What am I?',
+    'Riddle round: I am full of holes but still hold water. What am I?',
+    'Riddle round: I become yours when you share me. What am I?',
+    'Riddle round: I am not alive, but I can grow in chat. What am I?',
   ],
   compliment: [
-    'The box stamps the claimer with a soft little confidence buff.',
-    'A warm receipt prints itself: this person is appreciated.',
-    'The claim releases one compliment into the room. Accept it. No dodging.',
+    'Compliment chain: the claimer tags or names one person and says one kind sentence.',
+    'Warm pass: everyone can drop one short compliment for someone in chat.',
+    'Soft spotlight: say one good thing about the claimer or the server today.',
+    'Kind mirror: describe one strength you noticed in someone here.',
+    'Tiny applause: give someone credit for a small thing they did recently.',
+    'Moon pass: the claimer gives a compliment, then that person passes one forward.',
+    'No-dodging rule: the claimer must accept one nice sentence from the room.',
+    'Comfort note: send one sentence someone tired might need to hear.',
+    'Appreciation ping: mention one person who made chat better this week.',
+    'Quiet trophy: award an imaginary trophy to someone and explain why.',
+  ],
+  music: [
+    'Mini playlist: everyone drops one song for the current mood. The claimer chooses the title of the playlist.',
+    'Soundtrack round: share one track that would play during tonight\'s credits.',
+    'One-song note: send a song and one sentence about why it fits this moment.',
+    'Rainy radio: share a song that sounds better at night.',
+    'Boss theme: pick a track for finishing boring tasks.',
+    'Healing queue: drop one song that feels like rest.',
+    'Memory track: share a song tied to a harmless memory.',
+    'Server intro: choose a theme song for this channel.',
+    'Lyric spark: post a very short lyric vibe without quoting too much.',
+    'Album cover mood: describe today as if it were an album cover.',
+  ],
+  question: [
+    'Question round: what tiny thing made today easier?',
+    'Question round: what is one comfort item, song, or place you would keep in your pocket?',
+    'Question round: what are you looking forward to, even a little?',
+    'Question round: what is a small habit that genuinely helps you?',
+    'Question round: what fictional place would you visit for one evening?',
+    'Question round: what is something you liked before it became popular?',
+    'Question round: what snack fits your current mood?',
+    'Question round: what would your younger self be surprised you can do now?',
+    'Question round: what is one thing you want to learn casually?',
+    'Question round: what makes a server feel welcoming to you?',
+  ],
+  quest: [
+    'Mini quest: send one kind sentence to the room before the next box appears.',
+    'Mini quest: describe your mood using exactly three emojis.',
+    'Mini quest: share one harmless fun fact from your day.',
+    'Mini quest: drink water, then report back with "hydrated".',
+    'Mini quest: clean one tiny thing near you in under one minute.',
+    'Mini quest: recommend one useful app, site, or tool.',
+    'Mini quest: send a screenshot or description of something pretty you saw recently.',
+    'Mini quest: ask the room one low-pressure question.',
+    'Mini quest: name one task you will do after this message.',
+    'Mini quest: write a 5-word weather report for your mood.',
+  ],
+  quote: [
+    'Quote spark: write one short sentence that feels like a loading screen tip for life.',
+    'Quote spark: turn your current mood into a fake inspirational quote.',
+    'Quote spark: share one line that sounds calm, brave, or beautifully dramatic.',
+    'Quote spark: write a tiny fortune cookie message for the server.',
+    'Quote spark: make a fake ancient proverb about Discord.',
+    'Quote spark: write one sentence that would fit under a moon photo.',
+    'Quote spark: invent a motto for sleepy people doing their best.',
+    'Quote spark: make a dramatic quote about opening mystery boxes.',
+    'Quote spark: write one gentle reminder in 12 words or fewer.',
+    'Quote spark: create a quote that starts with "Even now..."',
+  ],
+  chaos: [
+    'Chaos round: everyone describes the box using one suspicious adjective.',
+    'Chaos round: invent a fake law the server must obey for the next 60 seconds.',
+    'Chaos round: name an imaginary item that should never exist.',
+    'Chaos round: rename the moon badly for one message.',
+    'Chaos round: describe your day as a fake patch note.',
+    'Chaos round: invent a useless superpower and its side effect.',
+    'Chaos round: write a warning label for this channel.',
+    'Chaos round: everyone posts one harmless conspiracy about snacks.',
+    'Chaos round: explain a normal object like it is forbidden magic.',
+    'Chaos round: create a fake achievement unlocked by the claimer.',
   ],
   game: [
-    'A tiny mini-game starts in spirit. The claimer gets first move.',
-    'The box rolls an invisible die and declares the claim valid.',
-    'A playful challenge appears. The room may now argue about the correct answer.',
+    'Mini game: the claimer asks a Would You Rather question. Everyone answers A or B.',
+    'Mini game: start Two Truths and One Tiny Lie. Keep it harmless.',
+    'Mini game: choose moon tea, star bread, or cloud soup. Defend your choice.',
+    'Mini game: first person to reply with a 5-letter word sets the theme.',
+    'Mini game: describe a movie badly and let others guess it.',
+    'Mini game: make a chain where each reply starts with the last letter of the previous reply.',
+    'Mini game: the claimer gives three emojis; others guess the story.',
+    'Mini game: rate the current vibe from 1 to 10 and explain with one word.',
+    'Mini game: invent a fake item shop and pick one item.',
+    'Mini game: name a color. Others reply with something that color.',
   ],
   lore: [
-    'A page of Moonlight lore unlocks for a few seconds.',
-    'The box adds this claim to the server archive.',
-    'A tiny story thread appears and vanishes into the moonlight.',
+    'Lore drop: add one sentence to the imaginary history of this server.',
+    'Lore drop: name a fictional place inside Moonlight\'s world and describe it in 5 words.',
+    'Lore drop: create a title for the current chat scene.',
+    'Lore drop: invent a server legend that starts with "Long before the pins..."',
+    'Lore drop: name the guardian of this channel.',
+    'Lore drop: describe a hidden room behind the chat.',
+    'Lore drop: create a festival celebrated by Moonlight users.',
+    'Lore drop: write one line from a lost server prophecy.',
+    'Lore drop: invent a harmless curse caused by missing sleep.',
+    'Lore drop: create a name for the next chapter of this server.',
   ],
   daily: [
-    'The box grants a small daily reset. Nothing huge, just enough.',
-    'A practical blessing drops out for the rest of the day.',
-    'The claim restores one invisible point of motivation.',
+    'Daily reset: name one tiny win from today.',
+    'Daily reset: pick one small thing you can finish in the next 10 minutes.',
+    'Daily reset: send a quick reminder your future self needs.',
+    'Daily reset: write one thing you are allowed to stop overthinking.',
+    'Daily reset: choose one word for the rest of your day.',
+    'Daily reset: share one comfort food, drink, or sound.',
+    'Daily reset: set a tiny intention for the next hour.',
+    'Daily reset: say one thing you survived this week.',
+    'Daily reset: list one thing that deserves less stress.',
+    'Daily reset: send one sentence to close the day gently.',
   ],
 };
 
-const getClaimEvent = (boxType) => randomItem(claimEvents[boxType] || claimEvents.daily);
+const getActivityKey = (box = {}) => {
+  const title = String(box.title || '').toLowerCase();
+  const content = String(box.content || '').toLowerCase();
+  const text = `${title} ${content}`;
+
+  if (text.includes('story') || text.includes('chain')) return 'story';
+  if (text.includes('riddle')) return 'riddle';
+  if (text.includes('compliment') || text.includes('approval') || text.includes('fanclub')) return 'compliment';
+  if (text.includes('playlist') || text.includes('song') || text.includes('track') || text.includes('lyric') || text.includes('radio')) return 'music';
+  if (text.includes('question card') || text.includes('answer') || box.boxType === 'question') return 'question';
+
+  return activityPools[box.boxType] ? box.boxType : 'daily';
+};
+
+const getClaimActivity = (box = {}) => {
+  const key = getActivityKey(box);
+  return {
+    key,
+    title: {
+      story: 'Story Spark Activity',
+      riddle: 'Riddle Activity',
+      compliment: 'Compliment Activity',
+      music: 'Playlist Activity',
+      question: 'Question Activity',
+      quest: 'Mini Quest Activity',
+      quote: 'Quote Spark Activity',
+      chaos: 'Chaos Activity',
+      game: 'Mini Game Activity',
+      lore: 'Lore Activity',
+      daily: 'Daily Reset Activity',
+    }[key],
+    prompt: randomItem(activityPools[key]),
+  };
+};
+
+const getClaimEvent = (boxType) => getClaimActivity({ boxType }).prompt;
+
+const buildClaimActivityEmbed = (box, activity = getClaimActivity(box)) => createEmbed({
+  title: activity.title,
+  description: activity.prompt,
+  variant: 'system',
+  thumbnail: icons.system,
+  fields: [
+    { name: 'Opened By', value: `<@${box.claimedBy}>`, inline: true },
+    { name: 'From Box', value: `${box.title} #${box.id}`, inline: true },
+    { name: 'How to play', value: 'Reply in this channel. No inventory needed, this is a live chat activity.', inline: false },
+  ],
+  footer: 'Moonlight Mystery Activity',
+});
 
 const buildMysteryBoxEmbed = (box) => createEmbed({
   title: box.title,
@@ -187,9 +317,9 @@ const buildMysteryBoxEmbed = (box) => createEmbed({
     { name: 'Box ID', value: `#${box.id}`, inline: true },
     { name: 'Type', value: box.boxType, inline: true },
     {
-      name: box.claimedBy ? 'Claimed By' : box.expiredAt ? 'Expired' : 'Hidden Reward',
+      name: box.claimedBy ? 'Claimed By' : box.expiredAt ? 'Expired' : 'Mystery Activity',
       value: box.claimedBy
-        ? `<@${box.claimedBy}>\n${box.reward}\n\n**Event:** ${getClaimEvent(box.boxType)}`
+        ? `<@${box.claimedBy}>\n\n**Event:** A live activity opened in chat.`
         : box.expiredAt
           ? 'Nobody claimed this box within 5 minutes.'
           : 'Press **Claim** to open it first. Expires in **5 minutes**.',
@@ -334,21 +464,33 @@ const handleMysteryBoxClaim = async (interaction) => {
     return true;
   }
 
+  const activity = getClaimActivity(claimed);
+
   await interaction.update({
     embeds: [buildMysteryBoxEmbed(claimed)],
     components: buildClaimRow(claimed),
     allowedMentions: { parse: [] },
   });
+
+  await interaction.followUp({
+    embeds: [buildClaimActivityEmbed(claimed, activity)],
+    allowedMentions: { users: [interaction.user.id] },
+  }).catch((error) => {
+    console.error('Mystery box activity send failed:', error);
+  });
   return true;
 };
 
 module.exports = {
+  activityPools,
   boxTemplates,
   buildClaimRow,
+  buildClaimActivityEmbed,
   buildMysteryBoxEmbed,
   boxTtlMs,
   canSendInChannel,
   createBoxPayload,
+  getClaimActivity,
   getClaimEvent,
   handleMysteryBoxClaim,
   pickRandomTextChannel,
