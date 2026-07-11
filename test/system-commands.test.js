@@ -128,3 +128,38 @@ test('currency helper converts amounts with latest rates', async () => {
   assert.match(embed.data.title, /USD/);
   assert.match(embed.data.description, /50,000/);
 });
+
+test('anonymous embed does not include sender identity', () => {
+  const anonymous = require('../commands/system/anonymous');
+  const embed = anonymous._private.buildAnonymousEmbed('secret hello');
+
+  assert.match(embed.data.title, /Anonymous/);
+  assert.match(embed.data.description, /secret hello/);
+  assert.doesNotMatch(JSON.stringify(embed.data), /user-1/);
+});
+
+test('holiday helper returns upcoming holidays', async () => {
+  const holiday = require('../commands/system/holiday');
+  const fakeFetch = async () => ({
+    ok: true,
+    json: async () => ([
+      { date: '2026-01-01', localName: 'Tết Dương lịch', name: "New Year's Day" },
+      { date: '2026-09-02', localName: 'Quốc khánh', name: 'National Day' },
+    ]),
+  });
+
+  const result = await holiday._private.getPublicHolidays({
+    country: 'vn',
+    year: 2026,
+  }, fakeFetch);
+  const selected = holiday._private.selectHolidays(result.holidays, {
+    now: new Date('2026-07-11T00:00:00Z'),
+  });
+  const embed = holiday._private.buildHolidayEmbed(result, {
+    now: new Date('2026-07-11T00:00:00Z'),
+  });
+
+  assert.equal(result.countryCode, 'VN');
+  assert.deepEqual(selected.map((item) => item.date), ['2026-09-02']);
+  assert.match(embed.data.fields[0].value, /Quốc khánh/);
+});

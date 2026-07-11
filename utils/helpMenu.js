@@ -11,6 +11,7 @@ const sections = [
       ['/settings view', 'Xem thiết lập Moonlight của server'],
       ['/settings voice-log <enabled>', 'Bật hoặc tắt thông báo join/leave voice'],
       ['/autoreply', 'Tạo phản hồi tự động theo trigger, channel và nhiều câu trả lời random'],
+      ['/anonymous <message>', 'Gửi tin nhắn anonymous tại kênh hiện tại'],
       ['?av [@user]', 'Xem avatar của bạn hoặc người được tag'],
       ['/avatar [user]', 'Xem avatar bằng slash command'],
       ['?server', 'Xem thông tin server hiện tại'],
@@ -19,6 +20,7 @@ const sections = [
       ['/weather <location>', 'Xem thời tiết theo địa điểm'],
       ['/time <location>', 'Xem giờ hiện tại theo địa điểm'],
       ['/currency <amount> <from> <to>', 'Đổi tiền tệ theo tỉ giá mới nhất'],
+      ['/holiday <country>', 'Xem ngày lễ theo quốc gia'],
       ['/reload command', 'Owner-only reload command không cần restart bot'],
       ['/reload settings', 'Owner-only reload .env và settings cache'],
       ['/restart', 'Owner-only restart bot qua PM2'],
@@ -61,6 +63,29 @@ const formatCommands = (commands) => (
   commands.map(([usage, description]) => `\`${usage}\`: ${description}`).join('\n')
 );
 
+const chunkCommands = (commands, maxLength = 1000) => {
+  const chunks = [];
+  let current = [];
+  let currentLength = 0;
+
+  for (const command of commands) {
+    const line = `\`${command[0]}\`: ${command[1]}`;
+    const nextLength = currentLength + line.length + (current.length > 0 ? 1 : 0);
+
+    if (current.length > 0 && nextLength > maxLength) {
+      chunks.push(current);
+      current = [];
+      currentLength = 0;
+    }
+
+    current.push(command);
+    currentLength += line.length + (current.length > 1 ? 1 : 0);
+  }
+
+  if (current.length > 0) chunks.push(current);
+  return chunks;
+};
+
 const buildHelpEmbed = (user) => {
   const helpEmbed = createEmbed({
     title: 'Moonlight Help!',
@@ -78,9 +103,12 @@ const buildHelpEmbed = (user) => {
   }
 
   sections.forEach((section) => {
-    helpEmbed.addFields({
-      name: section.name,
-      value: formatCommands(section.commands),
+    const chunks = chunkCommands(section.commands);
+    chunks.forEach((commands, index) => {
+      helpEmbed.addFields({
+        name: chunks.length > 1 ? `${section.name} ${index + 1}/${chunks.length}` : section.name,
+        value: formatCommands(commands),
+      });
     });
   });
 
@@ -94,5 +122,6 @@ const buildMainHelp = (_commands, user) => ({
 module.exports = {
   buildHelpEmbed,
   buildMainHelp,
+  chunkCommands,
   sections,
 };
