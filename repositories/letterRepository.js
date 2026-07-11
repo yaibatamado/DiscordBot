@@ -17,6 +17,7 @@ const mapRow = (row) => {
     song: row.song_title,
     songUrl: row.song_url,
     imageUrl: row.song_image_url,
+    tag: row.tag_text,
     anonymous: Boolean(row.is_anonymous),
     createdAt: row.created_at,
   };
@@ -44,12 +45,22 @@ const createLetterRepository = (database = db) => {
           song_title NVARCHAR(160) NOT NULL,
           song_url NVARCHAR(500) NULL,
           song_image_url NVARCHAR(500) NULL,
+          tag_text NVARCHAR(40) NULL,
           is_anonymous BIT NOT NULL CONSTRAINT DF_MoonlightLetters_is_anonymous DEFAULT (1),
           created_at DATETIME2 NOT NULL CONSTRAINT DF_MoonlightLetters_created_at DEFAULT (SYSUTCDATETIME())
         );
 
         CREATE INDEX IX_MoonlightLetters_guild_recipient
           ON dbo.MoonlightLetters (guild_id, recipient_name, id DESC);
+      END
+
+      IF COL_LENGTH('dbo.MoonlightLetters', 'tag_text') IS NULL
+      BEGIN
+        ALTER TABLE dbo.MoonlightLetters
+          ADD tag_text NVARCHAR(40) NULL;
+
+        CREATE INDEX IX_MoonlightLetters_guild_tag
+          ON dbo.MoonlightLetters (guild_id, tag_text, id DESC);
       END
     `);
 
@@ -66,6 +77,7 @@ const createLetterRepository = (database = db) => {
     song,
     songUrl = null,
     imageUrl = null,
+    tag = null,
     anonymous = true,
   }) => {
     const cleanRecipient = normalizeRecipient(recipient);
@@ -83,6 +95,7 @@ const createLetterRepository = (database = db) => {
       .input('song', song)
       .input('songUrl', songUrl)
       .input('imageUrl', imageUrl)
+      .input('tag', tag)
       .input('anonymous', anonymous ? 1 : 0)
       .query(`
         INSERT INTO dbo.MoonlightLetters (
@@ -95,6 +108,7 @@ const createLetterRepository = (database = db) => {
           song_title,
           song_url,
           song_image_url,
+          tag_text,
           is_anonymous
         )
         OUTPUT INSERTED.*
@@ -108,6 +122,7 @@ const createLetterRepository = (database = db) => {
           @song,
           @songUrl,
           @imageUrl,
+          @tag,
           @anonymous
         )
       `);
@@ -148,21 +163,115 @@ const createLetterRepository = (database = db) => {
     return mapRow(result.recordset[0]);
   };
 
-  const browse = async ({ guildId, recipient, limit = 5 }) => {
+  const list = async ({
+    guildId,
+    recipient = null,
+    tag = null,
+    senderId = null,
+    limit = 5,
+    offset = 0,
+  }) => {
+    await ensureTable();
+    const cleanRecipient = normalizeRecipient(recipient);
+    const pool = await database.getPool();
+    const result = await pool.request()
+      .input('guildId', guildId)
+      .input('recipient', cleanRecipient ? `%${cleanRecipient}%` : null)
+      .input('tag', tag || null)
+      .input('senderId', senderId || null)
+      .input('limit', limit)
+      .input('offset', offset)
+      .query(`
+        SELECT *
+        FROM dbo.MoonlightLetters
+        WHERE guild_id = @guildId
+          AND (@recipient IS NULL OR recipient_name LIKE @recipient)
+          AND (@tag IS NULL OR tag_text = @tag)
+          AND (@senderId IS NULL OR sender_id = @senderId)
+        ORDER BY id DESC
+        OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY
+      `);
+
+    return result.recordset.map(mapRow);
+  };
+
+  const count = async ({
+    guildId,
+    recipient = null,
+    tag = null,
+    senderId = null,
+  }) => {
+    await ensureTable();
+    const cleanRecipient = normalizeRecipient(recipient);
+    const pool = await database.getPool();
+    const result = await pool.request()
+      .input('guildId', guildId)
+      .input('recipient', cleanRecipient ? `%${cleanRecipient}%` : null)
+      .input('tag', tag || null)
+      .input('senderId', senderId || null)
+      .query(`
+        SELECT COUNT(1) AS total
+        FROM dbo.MoonlightLetters
+        WHERE guild_id = @guildId
+          AND (@recipient IS NULL OR recipient_name LIKE @recipient)
+          AND (@tag IS NULL OR tag_text = @tag)
+          AND (@senderId IS NULL OR sender_id = @senderId)
+      `);
+
+    return Number(result.recordset[0]?.total || 0);
+  };
+
+  const browse = async ({ guildId, recipient = null, tag = null, limit = 5, offset = 0 }) => list({
+    guildId,
+    recipient,
+    tag,
+    limit,
+    offset,
+  });
+
+  const mine = async ({ guildId, senderId, tag = null, limit = 5, offset = 0 }) => list({
+    guildId,
+    senderId,
+    tag,
+    limit,
+    offset,
+  });
+
+  const updateContent = async ({
+    guildId,
+    id,
+    message = null,
+    song = null,
+    songUrl = null,
+    imageUrl = null,
+    tag = null,
+    anonymous = null,
+  }) => {
     await ensureTable();
     const pool = await database.getPool();
     const result = await pool.request()
       .input('guildId', guildId)
-      .input('recipient', `%${normalizeRecipient(recipient)}%`)
-      .input('limit', limit)
+      .input('id', id)
+      .input('message', message)
+      .input('song', song)
+      .input('songUrl', songUrl)
+      .input('imageUrl', imageUrl)
+      .input('tag', tag)
+      .input('anonymous', typeof anonymous === 'boolean' ? (anonymous ? 1 : 0) : null)
       .query(`
-        SELECT TOP (@limit) *
-        FROM dbo.MoonlightLetters
-        WHERE guild_id = @guildId AND recipient_name LIKE @recipient
-        ORDER BY id DESC
+        UPDATE dbo.MoonlightLetters
+        SET
+          message_text = COALESCE(@message, message_text),
+          song_title = COALESCE(@song, song_title),
+          song_url = CASE WHEN @songUrl IS NULL THEN song_url ELSE @songUrl END,
+          song_image_url = CASE WHEN @imageUrl IS NULL THEN song_image_url ELSE @imageUrl END,
+          tag_text = CASE WHEN @tag IS NULL THEN tag_text ELSE @tag END,
+          is_anonymous = CASE WHEN @anonymous IS NULL THEN is_anonymous ELSE @anonymous END
+        OUTPUT INSERTED.*
+        WHERE guild_id = @guildId AND id = @id
       `);
 
-    return result.recordset.map(mapRow);
+    return mapRow(result.recordset[0]);
   };
 
   const random = async ({ guildId }) => {
@@ -198,9 +307,13 @@ const createLetterRepository = (database = db) => {
   return {
     add,
     browse,
+    count,
     findById,
+    list,
+    mine,
     random,
     remove,
+    updateContent,
     updateMessage,
     _private: {
       ensureTable,

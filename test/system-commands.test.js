@@ -147,6 +147,7 @@ test('letter helper builds public song letter embeds and buttons', () => {
     song: '505 - Arctic Monkeys',
     songUrl: 'https://open.spotify.com/track/example',
     imageUrl: 'https://example.com/album.png',
+    tag: 'nostalgia',
     anonymous: true,
     senderId: 'sender-1',
     senderName: 'Sender#0001',
@@ -159,29 +160,82 @@ test('letter helper builds public song letter embeds and buttons', () => {
   assert.equal(embed.data.title, 'Moonlight Letter #12');
   assert.match(embed.data.description, /small song/);
   assert.match(embed.data.fields.map((field) => field.value).join('\n'), /505 - Arctic Monkeys/);
+  assert.match(embed.data.fields.map((field) => field.value).join('\n'), /Nostalgia/);
   assert.equal(embed.data.thumbnail.url, 'https://example.com/album.png');
   assert.equal(buttons[0].components[0].data.custom_id, 'letter:view:12');
   assert.equal(buttons[0].components[1].data.url, 'https://open.spotify.com/track/example');
 });
 
-test('letter delete permission allows sender or manage messages moderator', () => {
+test('letter management permission allows sender or manage messages moderator', () => {
   const letterCommand = require('../commands/system/letter');
   const letter = { senderId: 'sender-1' };
 
-  assert.equal(letterCommand._private.canDeleteLetter({
+  assert.equal(letterCommand._private.canManageLetter({
     user: { id: 'sender-1' },
     member: { permissions: { has: () => false } },
   }, letter), true);
 
-  assert.equal(letterCommand._private.canDeleteLetter({
+  assert.equal(letterCommand._private.canManageLetter({
     user: { id: 'other-user' },
     member: { permissions: { has: () => true } },
   }, letter), true);
 
-  assert.equal(letterCommand._private.canDeleteLetter({
+  assert.equal(letterCommand._private.canManageLetter({
     user: { id: 'other-user' },
     member: { permissions: { has: () => false } },
   }, letter), false);
+});
+
+test('letter browse helper builds pagination controls', () => {
+  const letterCommand = require('../commands/system/letter');
+  const letters = [
+    { id: 1, recipient: 'An', message: 'hello', song: 'Song 1', tag: 'love' },
+    { id: 2, recipient: 'Bao', message: 'hi', song: 'Song 2', tag: 'sad' },
+  ];
+
+  const embed = letterCommand._private.buildBrowseEmbed({
+    title: 'All Moonlight Letters',
+    letters,
+    page: 1,
+    total: 12,
+    tag: 'love',
+  });
+  const rows = letterCommand._private.buildBrowseButtons({
+    letters,
+    token: 'abc123',
+    page: 1,
+    total: 12,
+  });
+
+  assert.match(embed.data.description, /2\/3/);
+  assert.match(embed.data.description, /Love/);
+  assert.equal(rows.length, 2);
+  assert.equal(rows[1].components[0].data.custom_id, 'letter:page:abc123:0');
+  assert.equal(rows[1].components[1].data.custom_id, 'letter:page:abc123:2');
+});
+
+test('letter command exposes mine edit and tag choices', () => {
+  const letterCommand = require('../commands/system/letter');
+  const command = letterCommand.data.toJSON();
+  const names = command.options.map((option) => option.name);
+  const send = command.options.find((option) => option.name === 'send');
+  const browse = command.options.find((option) => option.name === 'browse');
+  const tag = send.options.find((option) => option.name === 'tag');
+
+  assert.ok(names.includes('mine'));
+  assert.ok(names.includes('edit'));
+  assert.equal(send.options.find((option) => option.name === 'song').autocomplete, true);
+  assert.equal(browse.options.find((option) => option.name === 'recipient').required, false);
+  assert.ok(tag.choices.length >= 20);
+});
+
+test('letter cooldown helper tracks send cooldowns', () => {
+  const letterCommand = require('../commands/system/letter');
+  letterCommand._private.cooldowns.clear();
+
+  assert.equal(letterCommand._private.getCooldownLeft('guild', 'user', 1000), 0);
+  letterCommand._private.setCooldown('guild', 'user', 1000);
+  assert.equal(letterCommand._private.getCooldownLeft('guild', 'user', 1000), 60000);
 });
 
 test('letter song option supports music autocomplete', () => {
