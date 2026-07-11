@@ -105,6 +105,7 @@ const buildLetterEmbed = (letter, { compact = false, preview = false } = {}) => 
       { name: 'Tag', value: formatTag(letter.tag), inline: true },
       { name: 'Song', value: letter.songUrl ? `[${letter.song}](${letter.songUrl})` : letter.song, inline: false },
       { name: 'Sent At', value: preview ? 'Not posted yet' : formatDate(letter.createdAt), inline: true },
+      { name: 'Likes', value: String(letter.likeCount || 0), inline: true },
     ],
     footer: preview ? 'Moonlight Letters - Preview before posting' : 'Moonlight Letters',
   });
@@ -117,12 +118,14 @@ const buildBrowseEmbed = ({
   total = letters.length,
   recipient = null,
   tag = null,
+  keyword = null,
   mine = false,
 }) => {
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const filters = [
     recipient ? `Recipient: **${recipient}**` : null,
     tag ? `Tag: **${formatTag(tag)}**` : null,
+    keyword ? `Search: **${keyword}**` : null,
     mine ? 'Scope: **My letters**' : null,
   ].filter(Boolean).join('\n');
 
@@ -141,6 +144,7 @@ const buildBrowseEmbed = ({
       value: [
         `To: **${letter.recipient}**`,
         `Tag: **${formatTag(letter.tag)}**`,
+        `Likes: **${letter.likeCount || 0}**`,
         `Message: ${trimText(letter.message, 110)}`,
       ].join('\n'),
       inline: false,
@@ -157,6 +161,13 @@ const buildLetterButtons = (letter) => {
       .setCustomId(`letter:view:${letter.id}`)
       .setLabel('View Detail')
       .setStyle(ButtonStyle.Secondary)
+  );
+
+  row.addComponents(
+    new ButtonBuilder()
+      .setCustomId(`letter:like:${letter.id}`)
+      .setLabel(`Like (${letter.likeCount || 0})`)
+      .setStyle(ButtonStyle.Primary)
   );
 
   if (letter.songUrl) {
@@ -265,6 +276,7 @@ const createBrowseSession = async ({
   title,
   recipient = null,
   tag = null,
+  keyword = null,
   senderId = null,
   mine = false,
   page = 0,
@@ -274,12 +286,14 @@ const createBrowseSession = async ({
     guildId: interaction.guildId,
     recipient,
     tag,
+    keyword,
     senderId,
   });
   const letters = await letterRepository.list({
     guildId: interaction.guildId,
     recipient,
     tag,
+    keyword,
     senderId,
     limit: pageSize,
     offset: page * pageSize,
@@ -291,6 +305,7 @@ const createBrowseSession = async ({
     title,
     recipient,
     tag,
+    keyword,
     senderId,
     mine,
     total,
@@ -298,7 +313,7 @@ const createBrowseSession = async ({
   });
 
   return {
-    embeds: [buildBrowseEmbed({ title, letters, page, total, recipient, tag, mine })],
+    embeds: [buildBrowseEmbed({ title, letters, page, total, recipient, tag, keyword, mine })],
     components: buildBrowseButtons({ letters, token, page, total }),
     flags: MessageFlags.Ephemeral,
   };
@@ -327,6 +342,7 @@ const refreshBrowseSession = async (interaction, token, page) => {
     guildId: interaction.guildId,
     recipient: session.recipient,
     tag: session.tag,
+    keyword: session.keyword,
     senderId: session.senderId,
   });
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -335,6 +351,7 @@ const refreshBrowseSession = async (interaction, token, page) => {
     guildId: interaction.guildId,
     recipient: session.recipient,
     tag: session.tag,
+    keyword: session.keyword,
     senderId: session.senderId,
     limit: pageSize,
     offset: safePage * pageSize,
@@ -351,6 +368,7 @@ const refreshBrowseSession = async (interaction, token, page) => {
       total,
       recipient: session.recipient,
       tag: session.tag,
+      keyword: session.keyword,
       mine: session.mine,
     })],
     components: buildBrowseButtons({ letters, token, page: safePage, total }),
@@ -523,6 +541,19 @@ const executeMine = async (interaction) => {
   await interaction.reply(payload);
 };
 
+const executeSearch = async (interaction) => {
+  const keyword = interaction.options.getString('keyword', true);
+  const tag = interaction.options.getString('tag') || null;
+  const payload = await createBrowseSession({
+    interaction,
+    title: `Search: ${trimText(keyword, 40)}`,
+    keyword,
+    tag,
+  });
+
+  await interaction.reply(payload);
+};
+
 const executeView = async (interaction) => {
   const id = interaction.options.getInteger('id', true);
   const letter = await letterRepository.findById({ guildId: interaction.guildId, id });
@@ -661,6 +692,7 @@ const execute = async (interaction) => {
   if (subcommand === 'send') return executeSend(interaction);
   if (subcommand === 'browse') return executeBrowse(interaction);
   if (subcommand === 'mine') return executeMine(interaction);
+  if (subcommand === 'search') return executeSearch(interaction);
   if (subcommand === 'view') return executeView(interaction);
   if (subcommand === 'random') return executeRandom(interaction);
   if (subcommand === 'edit') return executeEdit(interaction);
@@ -689,6 +721,45 @@ const handleComponent = async (interaction) => {
       embeds: [buildLetterEmbed(letter)],
       components: buildLetterButtons(letter),
       flags: MessageFlags.Ephemeral,
+    });
+    return true;
+  }
+
+  if (action === 'like') {
+    const id = Number(first);
+    if (!Number.isInteger(id)) return false;
+
+    const letter = await letterRepository.findById({ guildId: interaction.guildId, id });
+    if (!letter) {
+      await interaction.reply({
+        content: 'Letter not found anymore.',
+        flags: MessageFlags.Ephemeral,
+      });
+      return true;
+    }
+
+    const result = await letterRepository.addLike({
+      guildId: interaction.guildId,
+      id,
+      userId: interaction.user.id,
+    });
+
+    if (!result.liked) {
+      await interaction.reply({
+        content: `You already liked Moonlight Letter #${id}.`,
+        flags: MessageFlags.Ephemeral,
+      });
+      return true;
+    }
+
+    const updated = await letterRepository.findById({ guildId: interaction.guildId, id });
+    if (interaction.message?.id !== updated.messageId) {
+      await updateOriginalMessage(interaction, updated);
+    }
+    await interaction.update({
+      embeds: [buildLetterEmbed(updated)],
+      components: buildLetterButtons(updated),
+      allowedMentions: { parse: [] },
     });
     return true;
   }
@@ -820,6 +891,21 @@ module.exports = {
         subcommand
           .setName('mine')
           .setDescription('Browse letters you posted')
+      )
+    )
+    .addSubcommand((subcommand) =>
+      addTagOption(
+        subcommand
+          .setName('search')
+          .setDescription('Search letters by recipient, message, or song')
+          .addStringOption((option) =>
+            option
+              .setName('keyword')
+              .setDescription('Keyword to search')
+              .setRequired(true)
+              .setMinLength(1)
+              .setMaxLength(80)
+          )
       )
     )
     .addSubcommand((subcommand) =>

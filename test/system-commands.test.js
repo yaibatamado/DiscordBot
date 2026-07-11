@@ -148,6 +148,7 @@ test('letter helper builds public song letter embeds and buttons', () => {
     songUrl: 'https://open.spotify.com/track/example',
     imageUrl: 'https://example.com/album.png',
     tag: 'nostalgia',
+    likeCount: 3,
     anonymous: true,
     senderId: 'sender-1',
     senderName: 'Sender#0001',
@@ -161,9 +162,12 @@ test('letter helper builds public song letter embeds and buttons', () => {
   assert.match(embed.data.description, /small song/);
   assert.match(embed.data.fields.map((field) => field.value).join('\n'), /505 - Arctic Monkeys/);
   assert.match(embed.data.fields.map((field) => field.value).join('\n'), /Nostalgia/);
+  assert.match(embed.data.fields.map((field) => field.value).join('\n'), /3/);
   assert.equal(embed.data.thumbnail.url, 'https://example.com/album.png');
   assert.equal(buttons[0].components[0].data.custom_id, 'letter:view:12');
-  assert.equal(buttons[0].components[1].data.url, 'https://open.spotify.com/track/example');
+  assert.equal(buttons[0].components[1].data.custom_id, 'letter:like:12');
+  assert.equal(buttons[0].components[1].data.label, 'Like (3)');
+  assert.equal(buttons[0].components[2].data.url, 'https://open.spotify.com/track/example');
 });
 
 test('letter management permission allows sender or manage messages moderator', () => {
@@ -189,8 +193,8 @@ test('letter management permission allows sender or manage messages moderator', 
 test('letter browse helper builds pagination controls', () => {
   const letterCommand = require('../commands/system/letter');
   const letters = [
-    { id: 1, recipient: 'An', message: 'hello', song: 'Song 1', tag: 'love' },
-    { id: 2, recipient: 'Bao', message: 'hi', song: 'Song 2', tag: 'sad' },
+    { id: 1, recipient: 'An', message: 'hello', song: 'Song 1', tag: 'love', likeCount: 2 },
+    { id: 2, recipient: 'Bao', message: 'hi', song: 'Song 2', tag: 'sad', likeCount: 0 },
   ];
 
   const embed = letterCommand._private.buildBrowseEmbed({
@@ -209,6 +213,7 @@ test('letter browse helper builds pagination controls', () => {
 
   assert.match(embed.data.description, /2\/3/);
   assert.match(embed.data.description, /Love/);
+  assert.match(embed.data.fields[0].value, /Likes: \*\*2\*\*/);
   assert.equal(rows.length, 2);
   assert.equal(rows[1].components[0].data.custom_id, 'letter:page:abc123:0');
   assert.equal(rows[1].components[1].data.custom_id, 'letter:page:abc123:2');
@@ -224,8 +229,10 @@ test('letter command exposes mine edit and tag choices', () => {
 
   assert.ok(names.includes('mine'));
   assert.ok(names.includes('edit'));
+  assert.ok(names.includes('search'));
   assert.equal(send.options.find((option) => option.name === 'song').autocomplete, true);
   assert.equal(browse.options.find((option) => option.name === 'recipient').required, false);
+  assert.equal(command.options.find((option) => option.name === 'search').options.find((option) => option.name === 'keyword').required, true);
   assert.ok(tag.choices.length >= 20);
 });
 

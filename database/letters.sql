@@ -29,3 +29,17 @@ BEGIN
   CREATE INDEX IX_MoonlightLetters_guild_tag
     ON dbo.MoonlightLetters (guild_id, tag_text, id DESC);
 END
+
+IF OBJECT_ID('dbo.MoonlightLetterLikes', 'U') IS NULL
+BEGIN
+  CREATE TABLE dbo.MoonlightLetterLikes (
+    letter_id INT NOT NULL,
+    guild_id NVARCHAR(32) NOT NULL,
+    user_id NVARCHAR(32) NOT NULL,
+    created_at DATETIME2 NOT NULL CONSTRAINT DF_MoonlightLetterLikes_created_at DEFAULT (SYSUTCDATETIME()),
+    CONSTRAINT PK_MoonlightLetterLikes PRIMARY KEY (letter_id, user_id)
+  );
+
+  CREATE INDEX IX_MoonlightLetterLikes_guild_letter
+    ON dbo.MoonlightLetterLikes (guild_id, letter_id);
+END

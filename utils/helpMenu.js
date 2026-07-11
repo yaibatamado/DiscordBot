@@ -12,7 +12,7 @@ const sections = [
       ['/settings voice-log <enabled>', 'Bật hoặc tắt thông báo join/leave voice'],
       ['/autoreply', 'Tạo phản hồi tự động theo trigger, channel và nhiều câu trả lời random'],
       ['/anonymous <message>', 'Gửi tin nhắn anonymous tại kênh hiện tại'],
-      ['/letter', 'Public song letter: preview trước khi đăng, browse phân trang, mine/edit/tag'],
+      ['/letter', 'Public song letter: preview, like, search, browse phân trang, mine/edit/tag'],
       ['?av [@user]', 'Xem avatar của bạn hoặc người được tag'],
       ['/avatar [user]', 'Xem avatar bằng slash command'],
       ['?server', 'Xem thông tin server hiện tại'],

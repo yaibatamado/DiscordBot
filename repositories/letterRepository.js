@@ -18,6 +18,7 @@ const mapRow = (row) => {
     songUrl: row.song_url,
     imageUrl: row.song_image_url,
     tag: row.tag_text,
+    likeCount: Number(row.like_count || 0),
     anonymous: Boolean(row.is_anonymous),
     createdAt: row.created_at,
   };
@@ -61,6 +62,20 @@ const createLetterRepository = (database = db) => {
 
         CREATE INDEX IX_MoonlightLetters_guild_tag
           ON dbo.MoonlightLetters (guild_id, tag_text, id DESC);
+      END
+
+      IF OBJECT_ID('dbo.MoonlightLetterLikes', 'U') IS NULL
+      BEGIN
+        CREATE TABLE dbo.MoonlightLetterLikes (
+          letter_id INT NOT NULL,
+          guild_id NVARCHAR(32) NOT NULL,
+          user_id NVARCHAR(32) NOT NULL,
+          created_at DATETIME2 NOT NULL CONSTRAINT DF_MoonlightLetterLikes_created_at DEFAULT (SYSUTCDATETIME()),
+          CONSTRAINT PK_MoonlightLetterLikes PRIMARY KEY (letter_id, user_id)
+        );
+
+        CREATE INDEX IX_MoonlightLetterLikes_guild_letter
+          ON dbo.MoonlightLetterLikes (guild_id, letter_id);
       END
     `);
 
@@ -155,9 +170,12 @@ const createLetterRepository = (database = db) => {
       .input('guildId', guildId)
       .input('id', id)
       .query(`
-        SELECT TOP 1 *
-        FROM dbo.MoonlightLetters
-        WHERE guild_id = @guildId AND id = @id
+        SELECT TOP 1 l.*,
+          (SELECT COUNT(1)
+           FROM dbo.MoonlightLetterLikes likes
+           WHERE likes.guild_id = l.guild_id AND likes.letter_id = l.id) AS like_count
+        FROM dbo.MoonlightLetters l
+        WHERE l.guild_id = @guildId AND l.id = @id
       `);
 
     return mapRow(result.recordset[0]);
@@ -168,27 +186,39 @@ const createLetterRepository = (database = db) => {
     recipient = null,
     tag = null,
     senderId = null,
+    keyword = null,
     limit = 5,
     offset = 0,
   }) => {
     await ensureTable();
     const cleanRecipient = normalizeRecipient(recipient);
+    const cleanKeyword = String(keyword || '').trim();
     const pool = await database.getPool();
     const result = await pool.request()
       .input('guildId', guildId)
       .input('recipient', cleanRecipient ? `%${cleanRecipient}%` : null)
       .input('tag', tag || null)
       .input('senderId', senderId || null)
+      .input('keyword', cleanKeyword ? `%${cleanKeyword}%` : null)
       .input('limit', limit)
       .input('offset', offset)
       .query(`
-        SELECT *
-        FROM dbo.MoonlightLetters
-        WHERE guild_id = @guildId
-          AND (@recipient IS NULL OR recipient_name LIKE @recipient)
-          AND (@tag IS NULL OR tag_text = @tag)
-          AND (@senderId IS NULL OR sender_id = @senderId)
-        ORDER BY id DESC
+        SELECT l.*,
+          (SELECT COUNT(1)
+           FROM dbo.MoonlightLetterLikes likes
+           WHERE likes.guild_id = l.guild_id AND likes.letter_id = l.id) AS like_count
+        FROM dbo.MoonlightLetters l
+        WHERE l.guild_id = @guildId
+          AND (@recipient IS NULL OR l.recipient_name LIKE @recipient)
+          AND (@tag IS NULL OR l.tag_text = @tag)
+          AND (@senderId IS NULL OR l.sender_id = @senderId)
+          AND (
+            @keyword IS NULL
+            OR l.recipient_name LIKE @keyword
+            OR l.message_text LIKE @keyword
+            OR l.song_title LIKE @keyword
+          )
+        ORDER BY l.id DESC
         OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY
       `);
 
@@ -200,15 +230,18 @@ const createLetterRepository = (database = db) => {
     recipient = null,
     tag = null,
     senderId = null,
+    keyword = null,
   }) => {
     await ensureTable();
     const cleanRecipient = normalizeRecipient(recipient);
+    const cleanKeyword = String(keyword || '').trim();
     const pool = await database.getPool();
     const result = await pool.request()
       .input('guildId', guildId)
       .input('recipient', cleanRecipient ? `%${cleanRecipient}%` : null)
       .input('tag', tag || null)
       .input('senderId', senderId || null)
+      .input('keyword', cleanKeyword ? `%${cleanKeyword}%` : null)
       .query(`
         SELECT COUNT(1) AS total
         FROM dbo.MoonlightLetters
@@ -216,6 +249,12 @@ const createLetterRepository = (database = db) => {
           AND (@recipient IS NULL OR recipient_name LIKE @recipient)
           AND (@tag IS NULL OR tag_text = @tag)
           AND (@senderId IS NULL OR sender_id = @senderId)
+          AND (
+            @keyword IS NULL
+            OR recipient_name LIKE @keyword
+            OR message_text LIKE @keyword
+            OR song_title LIKE @keyword
+          )
       `);
 
     return Number(result.recordset[0]?.total || 0);
@@ -271,7 +310,8 @@ const createLetterRepository = (database = db) => {
         WHERE guild_id = @guildId AND id = @id
       `);
 
-    return mapRow(result.recordset[0]);
+    if (!result.recordset[0]) return null;
+    return findById({ guildId, id });
   };
 
   const random = async ({ guildId }) => {
@@ -280,13 +320,66 @@ const createLetterRepository = (database = db) => {
     const result = await pool.request()
       .input('guildId', guildId)
       .query(`
-        SELECT TOP 1 *
-        FROM dbo.MoonlightLetters
-        WHERE guild_id = @guildId
+        SELECT TOP 1 l.*,
+          (SELECT COUNT(1)
+           FROM dbo.MoonlightLetterLikes likes
+           WHERE likes.guild_id = l.guild_id AND likes.letter_id = l.id) AS like_count
+        FROM dbo.MoonlightLetters l
+        WHERE l.guild_id = @guildId
         ORDER BY NEWID()
       `);
 
     return mapRow(result.recordset[0]);
+  };
+
+  const getLikeCount = async ({ guildId, id }) => {
+    await ensureTable();
+    const pool = await database.getPool();
+    const result = await pool.request()
+      .input('guildId', guildId)
+      .input('id', id)
+      .query(`
+        SELECT COUNT(1) AS total
+        FROM dbo.MoonlightLetterLikes
+        WHERE guild_id = @guildId AND letter_id = @id
+      `);
+
+    return Number(result.recordset[0]?.total || 0);
+  };
+
+  const addLike = async ({ guildId, id, userId }) => {
+    await ensureTable();
+    const pool = await database.getPool();
+    const existing = await pool.request()
+      .input('guildId', guildId)
+      .input('id', id)
+      .input('userId', userId)
+      .query(`
+        SELECT TOP 1 1 AS found
+        FROM dbo.MoonlightLetterLikes
+        WHERE guild_id = @guildId AND letter_id = @id AND user_id = @userId
+      `);
+
+    if (existing.recordset[0]) {
+      return {
+        liked: false,
+        total: await getLikeCount({ guildId, id }),
+      };
+    }
+
+    await pool.request()
+      .input('guildId', guildId)
+      .input('id', id)
+      .input('userId', userId)
+      .query(`
+        INSERT INTO dbo.MoonlightLetterLikes (letter_id, guild_id, user_id)
+        VALUES (@id, @guildId, @userId)
+      `);
+
+    return {
+      liked: true,
+      total: await getLikeCount({ guildId, id }),
+    };
   };
 
   const remove = async ({ guildId, id }) => {
@@ -296,6 +389,9 @@ const createLetterRepository = (database = db) => {
       .input('guildId', guildId)
       .input('id', id)
       .query(`
+        DELETE FROM dbo.MoonlightLetterLikes
+        WHERE guild_id = @guildId AND letter_id = @id;
+
         DELETE FROM dbo.MoonlightLetters
         OUTPUT DELETED.*
         WHERE guild_id = @guildId AND id = @id
@@ -306,9 +402,11 @@ const createLetterRepository = (database = db) => {
 
   return {
     add,
+    addLike,
     browse,
     count,
     findById,
+    getLikeCount,
     list,
     mine,
     random,
