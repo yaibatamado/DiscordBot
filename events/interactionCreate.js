@@ -192,6 +192,13 @@ module.exports = (client) => {
         }
       }
 
+      const commandName = interaction.customId.split(':')[0];
+      const componentCommand = client.slashCommands.get(commandName);
+      if (componentCommand?.handleComponent) {
+        const handled = await componentCommand.handleComponent(interaction);
+        if (handled) return;
+      }
+
       if (interaction.customId === 'back') {
 
         const msgId = interaction.message.id;

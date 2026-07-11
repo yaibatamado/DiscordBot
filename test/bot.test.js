@@ -44,6 +44,7 @@ test('slash loader registers the public slash command set', () => {
     'holiday',
     'join',
     'leave',
+    'letter',
     'mod',
     'moonlight',
     'music',
@@ -89,6 +90,7 @@ test('prefix help replies with a command list embed', () => {
   assert.match(fieldValues, /\/check/);
   assert.match(fieldValues, /\/settings voice-log/);
   assert.match(fieldValues, /\/anonymous/);
+  assert.match(fieldValues, /\/letter/);
   assert.match(fieldValues, /\/weather/);
   assert.match(fieldValues, /\/time/);
   assert.match(fieldValues, /\/currency/);

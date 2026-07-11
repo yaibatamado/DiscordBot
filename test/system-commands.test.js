@@ -138,6 +138,52 @@ test('anonymous embed does not include sender identity', () => {
   assert.doesNotMatch(JSON.stringify(embed.data), /user-1/);
 });
 
+test('letter helper builds public song letter embeds and buttons', () => {
+  const letterCommand = require('../commands/system/letter');
+  const letter = {
+    id: 12,
+    recipient: 'An',
+    message: 'A small song under the moon.',
+    song: '505 - Arctic Monkeys',
+    songUrl: 'https://open.spotify.com/track/example',
+    imageUrl: 'https://example.com/album.png',
+    anonymous: true,
+    senderId: 'sender-1',
+    senderName: 'Sender#0001',
+    createdAt: '2026-07-11T10:00:00Z',
+  };
+
+  const embed = letterCommand._private.buildLetterEmbed(letter);
+  const buttons = letterCommand._private.buildLetterButtons(letter);
+
+  assert.equal(embed.data.title, 'Moonlight Letter #12');
+  assert.match(embed.data.description, /small song/);
+  assert.match(embed.data.fields.map((field) => field.value).join('\n'), /505 - Arctic Monkeys/);
+  assert.equal(embed.data.thumbnail.url, 'https://example.com/album.png');
+  assert.equal(buttons[0].components[0].data.custom_id, 'letter:view:12');
+  assert.equal(buttons[0].components[1].data.url, 'https://open.spotify.com/track/example');
+});
+
+test('letter delete permission allows sender or manage messages moderator', () => {
+  const letterCommand = require('../commands/system/letter');
+  const letter = { senderId: 'sender-1' };
+
+  assert.equal(letterCommand._private.canDeleteLetter({
+    user: { id: 'sender-1' },
+    member: { permissions: { has: () => false } },
+  }, letter), true);
+
+  assert.equal(letterCommand._private.canDeleteLetter({
+    user: { id: 'other-user' },
+    member: { permissions: { has: () => true } },
+  }, letter), true);
+
+  assert.equal(letterCommand._private.canDeleteLetter({
+    user: { id: 'other-user' },
+    member: { permissions: { has: () => false } },
+  }, letter), false);
+});
+
 test('holiday helper returns upcoming holidays', async () => {
   const holiday = require('../commands/system/holiday');
   const fakeFetch = async () => ({
