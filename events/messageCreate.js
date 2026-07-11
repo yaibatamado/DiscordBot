@@ -4,6 +4,7 @@ const logger = require('../utils/logger');
 const triggerHandler = require('../handlers/triggerHandler');
 const { handleAutoReply } = require('../services/autoReplyService');
 const { handleAfkMessage } = require('../services/afkService');
+const { recordMessageStats } = require('../services/serverWrappedService');
 
 const cooldowns = new Map();
 
@@ -11,6 +12,10 @@ module.exports = (client) => {
   client.on('messageCreate', async (message) => {
 
     if (message.author.bot) return;
+
+    recordMessageStats(message).catch((error) => {
+      console.error('Message stats record failed:', error);
+    });
 
     const handledAfk = await handleAfkMessage(message);
     if (handledAfk) return;

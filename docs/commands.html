@@ -521,6 +521,30 @@
           </div>
         </article>
         <article class="command">
+          <h3><code>/mysterybox setup enabled:true</code><br><code>/mysterybox status</code> <code>/mysterybox preview</code></h3>
+          <div>
+            <p data-lang="vi">Bật hộp bí ẩn tự động. Cứ mỗi 30 phút, Moonlight sẽ chọn random một kênh text có thể gửi và thả một hộp có nút Claim.</p>
+            <p data-lang="en">Enable automatic mystery boxes. Every 30 minutes, Moonlight chooses a random sendable text channel and drops a box with a Claim button.</p>
+            <ul>
+              <li data-lang="vi">Mỗi hộp hết hạn sau 5 phút nếu không ai claim.</li>
+              <li data-lang="en">Each box expires after 5 minutes if nobody claims it.</li>
+              <li data-lang="vi">Nội dung hộp có nhiều loại: fortune, question, quest, quote, music, compliment...</li>
+              <li data-lang="en">Boxes have varied types: fortune, question, quest, quote, music, compliment...</li>
+            </ul>
+          </div>
+        </article>
+        <article class="command">
+          <h3><code>/serverwrapped setup channel:#chat enabled:true</code><br><code>/serverwrapped status</code> <code>/serverwrapped preview</code></h3>
+          <div>
+            <p data-lang="vi">Bật tổng kết server tự động. Moonlight ghi thống kê tin nhắn và gửi recap vào 0h thứ 2 tại kênh đã chọn.</p>
+            <p data-lang="en">Enable automatic server recaps. Moonlight records message stats and posts the weekly recap at Monday 00:00 in the configured channel.</p>
+            <ul>
+              <li data-lang="vi">Wrapped hiển thị tổng tin nhắn, top member, top channel và ngày sôi nổi nhất.</li>
+              <li data-lang="en">Wrapped shows total messages, top members, top channels, and the busiest day.</li>
+            </ul>
+          </div>
+        </article>
+        <article class="command">
           <h3><code>/letter send recipient:"An" message:"..." song:"505 - Arctic Monkeys" tag:nostalgia</code><br><code>/letter browse</code> <code>/letter search keyword:"moon"</code><br><code>/letter mine/edit/view/random/delete</code></h3>
           <div>
             <p data-lang="vi">Gửi một public song letter vào kênh hiện tại. Moonlight sẽ cho xem preview riêng tư trước, sau đó bạn bấm Post hoặc Cancel. <code>/letter browse</code> xem toàn bộ thư có phân trang; <code>/letter search</code> tìm theo người nhận, nội dung hoặc bài hát.</p>

@@ -5,6 +5,7 @@ const fs = require('fs');
 
 const { loadCommands } = require('./handlers/commandHandler');
 const loadSlash = require('./handlers/slashLoader');
+const { startAutomationScheduler } = require('./services/schedulerService');
 const { startStatusFileWriter, startStatusServer } = require('./utils/statusServer');
 
 const client = new Client({
@@ -31,6 +32,7 @@ for (const file of eventFiles) {
 
 let statusServer;
 let statusFileWriter;
+let automationScheduler;
 
 client.on('clientReady', () => {
   client.user.setPresence({
@@ -44,6 +46,10 @@ client.on('clientReady', () => {
 
   if (!statusFileWriter) {
     statusFileWriter = startStatusFileWriter(client);
+  }
+
+  if (!automationScheduler) {
+    automationScheduler = startAutomationScheduler(client);
   }
 
   console.log(`BOT ONLINE: ${client.user.tag}`);
