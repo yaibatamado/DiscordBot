@@ -129,6 +129,20 @@ module.exports = (client) => {
         });
       }
     }
+
+    if (interaction.isAutocomplete?.()) {
+      const command = client.slashCommands.get(interaction.commandName);
+      if (command?.handleAutocomplete) {
+        try {
+          await command.handleAutocomplete(interaction);
+        } catch (err) {
+          console.error(err);
+          await interaction.respond([]);
+        }
+      }
+      return;
+    }
+
     // ===== DROPDOWN =====
     if (interaction.isStringSelectMenu()) {
       const msgId = interaction.message.id;

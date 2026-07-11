@@ -184,6 +184,45 @@ test('letter delete permission allows sender or manage messages moderator', () =
   }, letter), false);
 });
 
+test('letter song option supports music autocomplete', () => {
+  const letterCommand = require('../commands/system/letter');
+  const command = letterCommand.data.toJSON();
+  const send = command.options.find((option) => option.name === 'send');
+  const song = send.options.find((option) => option.name === 'song');
+
+  assert.equal(song.autocomplete, true);
+});
+
+test('music search maps iTunes songs into autocomplete choices', async () => {
+  const musicSearch = require('../utils/musicSearch');
+  const fakeFetch = async (url) => {
+    assert.match(String(url), /itunes\.apple\.com\/search/);
+    assert.match(String(url), /entity=song/);
+    return {
+      ok: true,
+      json: async () => ({
+        results: [{
+          wrapperType: 'track',
+          kind: 'song',
+          trackId: 123,
+          trackName: '505',
+          artistName: 'Arctic Monkeys',
+          trackViewUrl: 'https://music.apple.com/song/505',
+          artworkUrl100: 'https://example.com/100x100bb.jpg',
+          collectionName: 'Favourite Worst Nightmare',
+        }],
+      }),
+    };
+  };
+
+  const songs = await musicSearch.searchSongs('505 arctic monkeys', { fetchImpl: fakeFetch });
+  const choices = musicSearch.buildSongChoices(songs);
+
+  assert.equal(songs[0].displayName, '505 - Arctic Monkeys');
+  assert.equal(songs[0].imageUrl, 'https://example.com/600x600bb.jpg');
+  assert.deepEqual(choices, [{ name: '505 - Arctic Monkeys', value: '505 - Arctic Monkeys' }]);
+});
+
 test('holiday helper returns upcoming holidays', async () => {
   const holiday = require('../commands/system/holiday');
   const fakeFetch = async () => ({

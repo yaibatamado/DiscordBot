@@ -8,6 +8,7 @@ const {
 } = require('discord.js');
 const { createEmbed, icons } = require('../../utils/uiEmbed');
 const letterRepository = require('../../repositories/letterRepository');
+const { buildSongChoices, searchSongs } = require('../../utils/musicSearch');
 
 const isHttpUrl = (value) => {
   if (!value) return false;
@@ -133,9 +134,10 @@ const executeSend = async (interaction) => {
 
   const recipient = interaction.options.getString('recipient', true);
   const message = interaction.options.getString('message', true);
-  const song = interaction.options.getString('song', true);
-  const songUrl = interaction.options.getString('url') || null;
-  const imageUrl = interaction.options.getString('image') || null;
+  const songInput = interaction.options.getString('song', true);
+  let song = songInput;
+  let songUrl = interaction.options.getString('url') || null;
+  let imageUrl = interaction.options.getString('image') || null;
   const anonymous = interaction.options.getBoolean('anonymous') ?? true;
 
   if (songUrl && !isHttpUrl(songUrl)) {
@@ -146,6 +148,19 @@ const executeSend = async (interaction) => {
   if (imageUrl && !isHttpUrl(imageUrl)) {
     await interaction.editReply('Image URL must start with http:// or https://.');
     return;
+  }
+
+  if (!songUrl || !imageUrl) {
+    try {
+      const [songResult] = await searchSongs(songInput, { limit: 1 });
+      if (songResult) {
+        song = songResult.displayName;
+        songUrl = songUrl || songResult.url;
+        imageUrl = imageUrl || songResult.imageUrl;
+      }
+    } catch {
+      // Manual song text still works when the music search provider is unavailable.
+    }
   }
 
   const letter = await letterRepository.add({
@@ -291,6 +306,25 @@ const handleComponent = async (interaction) => {
   return true;
 };
 
+const handleAutocomplete = async (interaction) => {
+  const subcommand = interaction.options.getSubcommand(false);
+  const focused = interaction.options.getFocused(true);
+
+  if (subcommand !== 'send' || focused.name !== 'song') {
+    await interaction.respond([]);
+    return true;
+  }
+
+  try {
+    const songs = await searchSongs(focused.value, { limit: 8 });
+    await interaction.respond(buildSongChoices(songs));
+  } catch {
+    await interaction.respond([]);
+  }
+
+  return true;
+};
+
 module.exports = {
   category: 'system',
   label: 'Letter',
@@ -326,6 +360,7 @@ module.exports = {
             .setRequired(true)
             .setMinLength(1)
             .setMaxLength(160)
+            .setAutocomplete(true)
         )
         .addStringOption((option) =>
           option
@@ -389,6 +424,7 @@ module.exports = {
     ),
 
   execute,
+  handleAutocomplete,
   handleComponent,
 
   _private: {
@@ -396,6 +432,7 @@ module.exports = {
     buildBrowseEmbed,
     buildLetterButtons,
     buildLetterEmbed,
+    buildSongChoices,
     canDeleteLetter,
     formatDate,
     isHttpUrl,

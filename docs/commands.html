@@ -497,13 +497,13 @@
         <article class="command">
           <h3><code>/letter send recipient:"An" message:"..." song:"505 - Arctic Monkeys"</code><br><code>/letter browse recipient:"An"</code><br><code>/letter view/random/delete</code></h3>
           <div>
-            <p data-lang="vi">Gửi một public song letter vào kênh hiện tại. Mỗi letter được lưu trong SQL Server để người khác có thể tìm theo tên người nhận, xem chi tiết, mở link bài hát hoặc lấy ngẫu nhiên.</p>
-            <p data-lang="en">Sends a public song letter to the current channel. Each letter is stored in SQL Server so others can search by recipient, view details, open the song link, or discover a random letter.</p>
+            <p data-lang="vi">Gửi một public song letter vào kênh hiện tại. Khi nhập <code>song</code>, Moonlight sẽ gợi ý bài hát kiểu Instagram Notes và tự lấy tên bài, nghệ sĩ, ảnh album, link nghe nếu tìm thấy.</p>
+            <p data-lang="en">Sends a public song letter to the current channel. While typing <code>song</code>, Moonlight suggests tracks like Instagram Notes and can auto-fill title, artist, album art, and listening link.</p>
             <ul>
               <li data-lang="vi">Mặc định ẩn danh, có thể đặt <code>anonymous:false</code> để hiện người gửi.</li>
               <li data-lang="en">Anonymous by default, with <code>anonymous:false</code> available to show the sender.</li>
-              <li data-lang="vi">Có thể thêm link Spotify/YouTube và ảnh album bằng option <code>url</code>, <code>image</code>.</li>
-              <li data-lang="en">Spotify/YouTube links and album art can be added with <code>url</code> and <code>image</code>.</li>
+              <li data-lang="vi">Option <code>url</code> và <code>image</code> vẫn dùng được nếu bạn muốn tự ghi đè link hoặc ảnh.</li>
+              <li data-lang="en"><code>url</code> and <code>image</code> still work when you want to override the link or art manually.</li>
               <li data-lang="vi">Người gửi hoặc mod có quyền quản lý tin nhắn có thể xóa letter.</li>
               <li data-lang="en">The sender or a moderator with Manage Messages can delete a letter.</li>
             </ul>
