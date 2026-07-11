@@ -7,6 +7,7 @@ const { createEmbed, icons } = require('../../utils/uiEmbed');
 const mysteryBoxRepository = require('../../repositories/mysteryBoxRepository');
 const {
   buildMysteryBoxEmbed,
+  canSendInChannel,
   createBoxPayload,
   handleMysteryBoxClaim,
 } = require('../../services/mysteryBoxService');
@@ -14,13 +15,13 @@ const {
 const buildSettingsEmbed = (settings) => createEmbed({
   title: 'Mystery Box Settings',
   description: settings?.enabled
-    ? 'Mystery Box is enabled. Moonlight will drop a random box every 30 minutes in a random text channel it can send to.'
+    ? 'Mystery Box is enabled. Moonlight will drop a random box every 10 minutes in the configured channel.'
     : 'Mystery Box is disabled.',
   variant: settings?.enabled ? 'success' : 'warning',
   thumbnail: icons.system,
   fields: [
-    { name: 'Mode', value: 'Random text channel', inline: true },
-    { name: 'Interval', value: 'Every 30 minutes', inline: true },
+    { name: 'Channel', value: settings?.channelId ? `<#${settings.channelId}>` : 'Not set', inline: true },
+    { name: 'Interval', value: 'Every 10 minutes', inline: true },
   ],
   footer: 'Moonlight Mystery Box',
 });
@@ -35,8 +36,19 @@ const executeSetup = async (interaction) => {
   }
 
   const enabled = interaction.options.getBoolean('enabled', true);
+  const channel = interaction.options.getChannel('channel', true);
+
+  if (!canSendInChannel(interaction.guild, channel)) {
+    await interaction.reply({
+      content: 'Moonlight needs View Channel, Send Messages, and Embed Links in that channel.',
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+
   const settings = await mysteryBoxRepository.setSettings({
     guildId: interaction.guildId,
+    channelId: channel.id,
     enabled,
     updatedBy: interaction.user.id,
   });
@@ -85,16 +97,22 @@ module.exports = {
 
   data: new SlashCommandBuilder()
     .setName('mysterybox')
-    .setDescription('Setup automatic random mystery boxes')
+    .setDescription('Setup automatic mystery boxes')
     .setDMPermission(false)
     .addSubcommand((subcommand) =>
       subcommand
         .setName('setup')
         .setDescription('Enable or disable automatic mystery boxes')
+        .addChannelOption((option) =>
+          option
+            .setName('channel')
+            .setDescription('Channel where Mystery Box should appear')
+            .setRequired(true)
+        )
         .addBooleanOption((option) =>
           option
             .setName('enabled')
-            .setDescription('Whether Mystery Box should auto-drop every 30 minutes')
+            .setDescription('Whether Mystery Box should auto-drop every 10 minutes')
             .setRequired(true)
         )
     )

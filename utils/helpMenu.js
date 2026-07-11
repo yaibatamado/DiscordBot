@@ -25,7 +25,7 @@ const sections = [
       ['/time <location>', 'Xem giờ hiện tại theo địa điểm'],
       ['/currency <amount> <from> <to>', 'Đổi tiền tệ theo tỉ giá mới nhất'],
       ['/holiday <country>', 'Xem ngày lễ theo quốc gia'],
-      ['/mysterybox setup <enabled>', 'Bật/tắt hộp bí ẩn tự rơi mỗi 30 phút ở kênh random'],
+      ['/mysterybox setup <channel> <enabled>', 'Bật/tắt hộp bí ẩn tự rơi mỗi 10 phút ở kênh đã chọn'],
       ['/serverwrapped setup <channel> <enabled>', 'Bật/tắt tổng kết server tự gửi 0h thứ 2'],
       ['/reload command', 'Owner-only reload command không cần restart bot'],
       ['/reload settings', 'Owner-only reload .env và settings cache'],

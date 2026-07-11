@@ -72,6 +72,12 @@ const createMysteryBoxRepository = (database = db) => {
           ON dbo.MoonlightMysteryBoxes (guild_id, sent_key);
       END
 
+      IF COL_LENGTH('dbo.MoonlightMysteryBoxSettings', 'channel_id') IS NULL
+      BEGIN
+        ALTER TABLE dbo.MoonlightMysteryBoxSettings
+          ADD channel_id NVARCHAR(32) NULL;
+      END
+
       IF COL_LENGTH('dbo.MoonlightMysteryBoxes', 'expires_at') IS NULL
       BEGIN
         ALTER TABLE dbo.MoonlightMysteryBoxes

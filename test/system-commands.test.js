@@ -170,6 +170,7 @@ test('mysterybox command exposes setup and builds expiring boxes', () => {
   const service = require('../services/mysteryBoxService');
   const command = mysterybox.data.toJSON();
   const names = command.options.map((option) => option.name);
+  const setup = command.options.find((option) => option.name === 'setup');
   const payload = service.createBoxPayload();
   const embed = service.buildMysteryBoxEmbed({
     id: 1,
@@ -183,7 +184,9 @@ test('mysterybox command exposes setup and builds expiring boxes', () => {
 
   assert.ok(names.includes('setup'));
   assert.ok(names.includes('status'));
-  assert.equal(command.options.find((option) => option.name === 'setup').options.find((option) => option.name === 'enabled').required, true);
+  assert.equal(setup.options.find((option) => option.name === 'channel').required, true);
+  assert.equal(setup.options.find((option) => option.name === 'enabled').required, true);
+  assert.equal(service.boxTemplates.length, 100);
   assert.match(embed.data.fields.map((field) => field.value).join('\n'), /Expires in \*\*5 minutes\*\*/);
   assert.match(expiredEmbed.data.fields.map((field) => field.value).join('\n'), /Nobody claimed/);
 });
@@ -191,6 +194,7 @@ test('mysterybox command exposes setup and builds expiring boxes', () => {
 test('serverwrapped command exposes setup and scheduler timing', () => {
   const serverwrapped = require('../commands/system/serverwrapped');
   const service = require('../services/serverWrappedService');
+  const scheduler = require('../services/schedulerService');
   const command = serverwrapped.data.toJSON();
   const setup = command.options.find((option) => option.name === 'setup');
 
@@ -199,6 +203,8 @@ test('serverwrapped command exposes setup and scheduler timing', () => {
   assert.equal(setup.options.find((option) => option.name === 'enabled').required, true);
   assert.equal(service.shouldRunWrappedNow(new Date('2026-07-12T17:00:00Z')), true);
   assert.equal(service.shouldRunWrappedNow(new Date('2026-07-12T17:01:00Z')), false);
+  assert.equal(scheduler.shouldRunMysteryBoxNow(new Date('2026-07-12T17:10:00Z')), true);
+  assert.equal(scheduler.shouldRunMysteryBoxNow(new Date('2026-07-12T17:15:00Z')), false);
 });
 
 test('letter helper builds public song letter embeds and buttons', () => {

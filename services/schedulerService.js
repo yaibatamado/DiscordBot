@@ -6,11 +6,15 @@ let schedulerTimer = null;
 let lastMysteryKey = null;
 let lastWrappedKey = null;
 
+const shouldRunMysteryBoxNow = (now = new Date()) => {
+  const { minute } = getLocalHourMinute(now);
+  return minute % 10 === 0;
+};
+
 const runSchedulerTick = async (client, now = new Date()) => {
   const minuteKey = getMinuteKey(now);
-  const { minute } = getLocalHourMinute(now);
 
-  if ((minute === 0 || minute === 30) && lastMysteryKey !== minuteKey) {
+  if (shouldRunMysteryBoxNow(now) && lastMysteryKey !== minuteKey) {
     lastMysteryKey = minuteKey;
     await runMysteryBoxTick(client, now);
   }
@@ -39,6 +43,7 @@ const startAutomationScheduler = (client) => {
 
 module.exports = {
   runSchedulerTick,
+  shouldRunMysteryBoxNow,
   startAutomationScheduler,
   _private: {
     get lastMysteryKey() {
