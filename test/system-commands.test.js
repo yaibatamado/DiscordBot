@@ -425,4 +425,5 @@ test('space command fetches NASA APOD and builds an image embed', async () => {
   assert.equal(embed.data.image.url, 'https://example.com/space-hd.jpg');
   assert.match(embed.data.title, /Space Today/);
   assert.match(embed.data.fields.map((field) => field.value).join('\n'), /Open NASA media/);
+  assert.match(space._private.getSpaceErrorMessage({ status: 429 }), /NASA_API_KEY/);
 });

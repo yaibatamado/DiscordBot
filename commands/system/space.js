@@ -22,7 +22,11 @@ const formatDate = (value) => {
 
 const fetchJson = async (url, fetchImpl = fetch) => {
   const response = await fetchImpl(url);
-  if (!response.ok) throw new Error(`NASA API HTTP ${response.status}`);
+  if (!response.ok) {
+    const error = new Error(`NASA API HTTP ${response.status}`);
+    error.status = response.status;
+    throw error;
+  }
   return response.json();
 };
 
@@ -73,6 +77,17 @@ const buildSpaceEmbed = (apod, mode = 'today') => {
   });
 };
 
+const getSpaceErrorMessage = (error) => {
+  if (error?.status === 429) {
+    return [
+      'NASA API dang gioi han DEMO_KEY.',
+      'Hay them `NASA_API_KEY` vao `.env`, sau do dung `/reload settings` hoac restart bot.',
+    ].join('\n');
+  }
+
+  return `Khong lay duoc du lieu vu tru luc nay: ${error.message}`;
+};
+
 const execute = async (interaction) => {
   const subcommand = interaction.options.getSubcommand();
   await interaction.deferReply();
@@ -81,7 +96,7 @@ const execute = async (interaction) => {
     const apod = await getApod({ mode: subcommand });
     await interaction.editReply({ embeds: [buildSpaceEmbed(apod, subcommand)] });
   } catch (error) {
-    await interaction.editReply(`Khong lay duoc du lieu vu tru luc nay: ${error.message}`);
+    await interaction.editReply(getSpaceErrorMessage(error));
   }
 };
 
@@ -109,6 +124,7 @@ module.exports = {
   _private: {
     buildSpaceEmbed,
     formatDate,
+    getSpaceErrorMessage,
     getApod,
     truncate,
   },
