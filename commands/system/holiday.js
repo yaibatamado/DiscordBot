@@ -126,7 +126,7 @@ const buildHolidayEmbed = ({ countryCode, year, holidays }, options = {}) => {
   const titlePrefix = upcomingOnly ? 'Ngày lễ sắp tới' : 'Ngày lễ';
 
   return createEmbed({
-    title: `🎌 ${titlePrefix} - ${countryCode} ${year}`,
+    title: `📅 ${titlePrefix} - ${countryCode} ${year}`,
     description: selected.length > 0
       ? `Hiển thị **${selected.length}** ngày lễ ${upcomingOnly ? 'sắp tới' : 'trong năm'}.`
       : 'Không tìm thấy ngày lễ phù hợp.',
