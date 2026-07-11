@@ -163,3 +163,13 @@ test('holiday helper returns upcoming holidays', async () => {
   assert.deepEqual(selected.map((item) => item.date), ['2026-09-02']);
   assert.match(embed.data.fields[0].value, /Quốc khánh/);
 });
+
+test('holiday country input accepts common country names', () => {
+  const holiday = require('../commands/system/holiday');
+
+  assert.equal(holiday._private.normalizeCountryCode('Viet Nam'), 'VN');
+  assert.equal(holiday._private.normalizeCountryCode('Việt Nam'), 'VN');
+  assert.equal(holiday._private.normalizeCountryCode('Japan'), 'JP');
+  assert.equal(holiday._private.normalizeCountryCode('United States'), 'US');
+  assert.equal(holiday._private.normalizeCountryCode('gb'), 'GB');
+});

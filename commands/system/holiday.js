@@ -1,7 +1,54 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { createEmbed, icons } = require('../../utils/uiEmbed');
 
-const normalizeCountryCode = (value) => String(value || '').trim().toUpperCase();
+const countryAliases = new Map([
+  ['VIET NAM', 'VN'],
+  ['VIETNAM', 'VN'],
+  ['VN', 'VN'],
+  ['UNITED STATES', 'US'],
+  ['UNITED STATES OF AMERICA', 'US'],
+  ['USA', 'US'],
+  ['US', 'US'],
+  ['AMERICA', 'US'],
+  ['JAPAN', 'JP'],
+  ['JP', 'JP'],
+  ['SOUTH KOREA', 'KR'],
+  ['KOREA', 'KR'],
+  ['KR', 'KR'],
+  ['SINGAPORE', 'SG'],
+  ['SG', 'SG'],
+  ['THAILAND', 'TH'],
+  ['TH', 'TH'],
+  ['CHINA', 'CN'],
+  ['CN', 'CN'],
+  ['TAIWAN', 'TW'],
+  ['TW', 'TW'],
+  ['FRANCE', 'FR'],
+  ['FR', 'FR'],
+  ['GERMANY', 'DE'],
+  ['DEUTSCHLAND', 'DE'],
+  ['DE', 'DE'],
+  ['UNITED KINGDOM', 'GB'],
+  ['UK', 'GB'],
+  ['GREAT BRITAIN', 'GB'],
+  ['GB', 'GB'],
+  ['AUSTRALIA', 'AU'],
+  ['AU', 'AU'],
+  ['CANADA', 'CA'],
+  ['CA', 'CA'],
+]);
+
+const normalizeCountryInput = (value) => String(value || '')
+  .trim()
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .replace(/\s+/g, ' ')
+  .toUpperCase();
+
+const normalizeCountryCode = (value) => {
+  const normalized = normalizeCountryInput(value);
+  return countryAliases.get(normalized) || normalized;
+};
 
 const formatHolidayDate = (dateText, locale = 'vi-VN') => {
   const date = new Date(`${dateText}T00:00:00Z`);
@@ -107,7 +154,7 @@ const execute = async (interaction) => {
       embeds: [buildHolidayEmbed(result, { upcomingOnly })],
     });
   } catch (error) {
-    await interaction.editReply(`Không lấy được ngày lễ lúc này. Hãy thử mã quốc gia dạng ISO-2 như \`VN\`, \`US\`, \`JP\`. (${error.message})`);
+    await interaction.editReply(`Không lấy được ngày lễ lúc này. Hãy thử mã ISO-2 hoặc tên phổ biến như \`VN\`, \`Viet Nam\`, \`Japan\`. (${error.message})`);
   }
 };
 
@@ -121,10 +168,10 @@ module.exports = {
     .addStringOption((option) =>
       option
         .setName('country')
-        .setDescription('Mã quốc gia ISO-2, ví dụ: VN, US, JP')
+        .setDescription('Mã quốc gia hoặc tên quốc gia, ví dụ: VN, Viet Nam, Japan')
         .setRequired(true)
         .setMinLength(2)
-        .setMaxLength(2)
+        .setMaxLength(60)
     )
     .addIntegerOption((option) =>
       option
@@ -147,6 +194,8 @@ module.exports = {
     daysUntil,
     formatHolidayDate,
     getPublicHolidays,
+    countryAliases,
+    normalizeCountryInput,
     normalizeCountryCode,
     selectHolidays,
   },
