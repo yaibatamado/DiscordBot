@@ -181,14 +181,24 @@ test('mysterybox command exposes setup and builds expiring boxes', () => {
     ...payload,
     expiredAt: new Date(),
   });
+  const claimedEmbed = service.buildMysteryBoxEmbed({
+    id: 3,
+    boxType: 'music',
+    title: 'Playlist Box',
+    content: 'Share a song.',
+    reward: 'Playlist note x1',
+    claimedBy: 'user-1',
+  });
 
   assert.ok(names.includes('setup'));
   assert.ok(names.includes('status'));
   assert.equal(setup.options.find((option) => option.name === 'channel').required, true);
   assert.equal(setup.options.find((option) => option.name === 'enabled').required, true);
   assert.equal(service.boxTemplates.length, 100);
+  assert.match(service.getClaimEvent('music'), /song|playlist|melody|frequency|track/i);
   assert.match(embed.data.fields.map((field) => field.value).join('\n'), /Expires in \*\*5 minutes\*\*/);
   assert.match(expiredEmbed.data.fields.map((field) => field.value).join('\n'), /Nobody claimed/);
+  assert.match(claimedEmbed.data.fields.map((field) => field.value).join('\n'), /Event:/);
 });
 
 test('serverwrapped command exposes setup and scheduler timing', () => {
@@ -387,4 +397,32 @@ test('holiday country input accepts common country names', () => {
   assert.equal(holiday._private.normalizeCountryCode('Japan'), 'JP');
   assert.equal(holiday._private.normalizeCountryCode('United States'), 'US');
   assert.equal(holiday._private.normalizeCountryCode('gb'), 'GB');
+});
+
+test('space command fetches NASA APOD and builds an image embed', async () => {
+  const space = require('../commands/system/space');
+  const command = space.data.toJSON();
+  const fakeFetch = async (url) => {
+    assert.match(String(url), /api\.nasa\.gov\/planetary\/apod/);
+    return {
+      ok: true,
+      json: async () => ({
+        title: 'Moon Test',
+        explanation: 'A calm test image from space.',
+        date: '2026-07-12',
+        media_type: 'image',
+        url: 'https://example.com/space.jpg',
+        hdurl: 'https://example.com/space-hd.jpg',
+      }),
+    };
+  };
+
+  const result = await space._private.getApod({ mode: 'today' }, fakeFetch);
+  const embed = space._private.buildSpaceEmbed(result, 'today');
+
+  assert.deepEqual(command.options.map((option) => option.name), ['today', 'random']);
+  assert.equal(result.title, 'Moon Test');
+  assert.equal(embed.data.image.url, 'https://example.com/space-hd.jpg');
+  assert.match(embed.data.title, /Space Today/);
+  assert.match(embed.data.fields.map((field) => field.value).join('\n'), /Open NASA media/);
 });

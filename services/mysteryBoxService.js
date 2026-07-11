@@ -123,6 +123,61 @@ const boxTtlMs = 5 * 60 * 1000;
 
 const randomItem = (items) => items[Math.floor(Math.random() * items.length)];
 
+const claimEvents = {
+  fortune: [
+    'A silver spark circles the room. Your next message carries a little extra luck.',
+    'The box opens into a soft omen: choose the brave option once today.',
+    'Moonlight marks this claim as a lucky turn. Small chances feel slightly warmer.',
+  ],
+  question: [
+    'A question floats out and waits for an answer in chat.',
+    'The box asks everyone nearby to share one tiny honest thought.',
+    'A quiet prompt appears. The claimer gets to start the next conversation.',
+  ],
+  quest: [
+    'A mini quest begins. Complete the prompt and claim moral victory.',
+    'The box assigns a harmless side quest to the claimer.',
+    'A task marker appears above the chat. The reward is good room energy.',
+  ],
+  quote: [
+    'The quote glows brighter after being claimed.',
+    'The box pins this sentence to the night for a moment.',
+    'A small line of wisdom escapes and politely refuses to be forgotten.',
+  ],
+  chaos: [
+    'The lid pops open dramatically. Nothing explodes, which is honestly suspicious.',
+    'A harmless chaos pulse shakes the box and improves the room by 1 nonsense.',
+    'The box briefly becomes too powerful, then calms down.',
+  ],
+  music: [
+    'A tiny playlist note drops out. The claimer should share a song if they want.',
+    'The box tunes the room to a late-night frequency.',
+    'A melody fragment appears. Someone owes the chat one good track.',
+  ],
+  compliment: [
+    'The box stamps the claimer with a soft little confidence buff.',
+    'A warm receipt prints itself: this person is appreciated.',
+    'The claim releases one compliment into the room. Accept it. No dodging.',
+  ],
+  game: [
+    'A tiny mini-game starts in spirit. The claimer gets first move.',
+    'The box rolls an invisible die and declares the claim valid.',
+    'A playful challenge appears. The room may now argue about the correct answer.',
+  ],
+  lore: [
+    'A page of Moonlight lore unlocks for a few seconds.',
+    'The box adds this claim to the server archive.',
+    'A tiny story thread appears and vanishes into the moonlight.',
+  ],
+  daily: [
+    'The box grants a small daily reset. Nothing huge, just enough.',
+    'A practical blessing drops out for the rest of the day.',
+    'The claim restores one invisible point of motivation.',
+  ],
+};
+
+const getClaimEvent = (boxType) => randomItem(claimEvents[boxType] || claimEvents.daily);
+
 const buildMysteryBoxEmbed = (box) => createEmbed({
   title: box.title,
   description: box.content,
@@ -134,7 +189,7 @@ const buildMysteryBoxEmbed = (box) => createEmbed({
     {
       name: box.claimedBy ? 'Claimed By' : box.expiredAt ? 'Expired' : 'Hidden Reward',
       value: box.claimedBy
-        ? `<@${box.claimedBy}>\n${box.reward}`
+        ? `<@${box.claimedBy}>\n${box.reward}\n\n**Event:** ${getClaimEvent(box.boxType)}`
         : box.expiredAt
           ? 'Nobody claimed this box within 5 minutes.'
           : 'Press **Claim** to open it first. Expires in **5 minutes**.',
@@ -294,6 +349,7 @@ module.exports = {
   boxTtlMs,
   canSendInChannel,
   createBoxPayload,
+  getClaimEvent,
   handleMysteryBoxClaim,
   pickRandomTextChannel,
   runMysteryBoxTick,
